@@ -36,26 +36,24 @@ df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
 
 #This chunk won't be needed, need to expand age error mat so it goes out to age 23
 df <- subset(df, final_age <= 18)
-#df <- subset(df, final_age > 0)
-#write.csv(df, paste0("./python/input.csv"), row.names=FALSE)
 
 input_age <- as.numeric(df$final_age)
 
 set.seed(581)
 new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) #bootstrap age estimates 
 
-#file_list <- list.files("./python", include.dirs = TRUE)
-
 dir.create("./sims", showWarnings = FALSE) #creat a folder to store all the sims
 
 #replace original age estimates with bootstrap ages
 for (i in 1:ncol(new_ages)) {
   dir.create(paste0("./sims/",i),showWarnings = FALSE)
-  #file.copy(from = paste0("./python/",file_list), to = paste0("./sims/",i),  overwrite = TRUE, recursive = TRUE, 
-  #          copy.mode = TRUE)
   df$final_age <- new_ages[,i]
   write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
 }
+
+metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
+colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
+metrics[,1] <- 1:nsim
 
 for (i in 1:nsim) {
   #model adapted from Benson et al. 2023
@@ -70,8 +68,7 @@ for (i in 1:nsim) {
   library(ggplot2)
   library(tidyr)
   
-  wd <- paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/data/sims/",i)
-  setwd(wd)
+  setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/data/sims/",i))
   
   data <- read.csv('./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv')
   
@@ -514,4 +511,13 @@ for (i in 1:nsim) {
   
   save.image(file = "./Output/workspace.RData")
   
+  metrics[i,2] <- r_squared_tr
+  metrics[i,3] <- rmse_tr
+  metrics[i,4] <- r_squared
+  metrics[i,5] <- rmse
 }
+
+setwd(wd)
+write.csv(metrics, 
+          file = "./sims/metrics.csv", 
+          row.names = FALSE)
