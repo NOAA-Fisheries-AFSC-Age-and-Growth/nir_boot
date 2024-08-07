@@ -1,5 +1,13 @@
 #This script bootstraps the age data and runs the MMCNN for all iterations
 
+library(tidyverse)
+library(tensorflow)
+library(keras3)
+library(kerastuneR)
+library(signal)
+library(ggplot2)
+library(tidyr)
+
 wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 source(paste0(wd,"/R/Functions.R"))
@@ -60,17 +68,10 @@ for (i in 1:nsim) {
   #translated from python to R
   
   Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
-  library(tidyverse)
-  library(tensorflow)
-  library(keras3)
-  library(kerastuneR)
-  library(signal)
-  library(ggplot2)
-  library(tidyr)
+
+    setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims/",i))
   
-  setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/data/sims/",i))
-  
-  data <- read.csv('./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv')
+  data <- read.csv('./input.csv')
   
   data <- data[data$sample != "outlier", , drop = FALSE]
   
