@@ -52,10 +52,16 @@ new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) #bootstrap age estimates
 
 dir.create("./sims", showWarnings = FALSE) #creat a folder to store all the sims
 
-#replace original age estimates with bootstrap ages
+split_ratio <- c("training" = 0.8, "test" = 0.2)
+num_training <- floor(length(df[, 2]) * split_ratio["training"])
+num_test <- length(df[, 2]) - num_training
+values <- c(rep("training", num_training), rep("test", num_test))
+
+#replace original age estimates with bootstrap ages and randomly assign test/train
 for (i in 1:ncol(new_ages)) {
   dir.create(paste0("./sims/",i),showWarnings = FALSE)
   df$final_age <- new_ages[,i]
+  df[, 2] <- sample(values, size = length(df[, 2]), replace = FALSE)
   write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
 }
 
@@ -63,13 +69,13 @@ metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
 colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
 metrics[,1] <- 1:nsim
 
-for (i in 1:nsim) {
+for (j in 1:nsim) {
   #model adapted from Benson et al. 2023
   #translated from python to R
   
   Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
-    setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims/",i))
+  setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims/",j))
   
   data <- read.csv('./input.csv')
   
@@ -247,7 +253,7 @@ for (i in 1:nsim) {
   
   # Plot
   ggplot(history_long, aes(x = epoch, y = value, color = type)) +
-    geom_line(size = 1) +
+    geom_line(linewidth = 1) +
     labs(title = "Model Loss", y = "Loss", x = "Epoch") +
     scale_color_manual(values = c("blue", "red"), labels = c("Train", "Validation")) +
     theme_minimal() +
@@ -419,10 +425,10 @@ for (i in 1:nsim) {
   r_squared <- r2_score(y_test_transformed, y_pred_transformed)
   
   # Round to two decimal places
-  r_squared <- round(r_squared, 2)
+  r_squared_rounded <- round(r_squared, 2)
   
   # Print the rounded R^2 score
-  print(paste("Rounded R^2 score:", r_squared))
+  print(paste("Rounded R^2 score:", r_squared_rounded))
   
   # Compute RMSE
   rmse <- rmse_manual(y_test_transformed, y_pred_transformed)
@@ -510,12 +516,12 @@ for (i in 1:nsim) {
   # Print the plot
   print(plot)
   
-  save.image(file = "./Output/workspace.RData")
+  metrics[j,2] <- as.numeric(r_squared_tr)
+  metrics[j,3] <- as.numeric(rmse_tr)
+  metrics[j,4] <- as.numeric(r_squared)
+  metrics[j,5] <- as.numeric(rmse)
   
-  metrics[i,2] <- r_squared_tr
-  metrics[i,3] <- rmse_tr
-  metrics[i,4] <- r_squared
-  metrics[i,5] <- rmse
+  save.image(file = "./Output/workspace.RData")
 }
 
 setwd(wd)
