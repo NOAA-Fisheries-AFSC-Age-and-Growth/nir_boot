@@ -12,7 +12,7 @@ wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 source(paste0(wd,"/R/Functions.R"))
 
-nsim <- 2
+nsim <- 10
 
 #import TMA age error data, bias columns are (expected age-0.5)
 {
@@ -81,6 +81,9 @@ metrics[,1] <- 1:nsim
 for (j in 1:nsim) {
   #model adapted from Benson et al. 2023
   #translated from python to R
+  
+  # Clear Keras session and garbage collection
+  keras3::clear_session()
   
   Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
