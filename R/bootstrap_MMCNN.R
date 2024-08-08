@@ -69,6 +69,15 @@ metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
 colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
 metrics[,1] <- 1:nsim
 
+{
+  spectra <- df[, 8:ncol(df)]
+  
+  # Apply Savitzky-Golay filter with specified parameters
+  for (i in 1:nrow(spectra)) {
+    spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
+  }
+}
+
 for (j in 1:nsim) {
   #model adapted from Benson et al. 2023
   #translated from python to R
@@ -78,6 +87,8 @@ for (j in 1:nsim) {
   setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims/",j))
   
   data <- read.csv('./input.csv')
+  
+  data[, 8:ncol(data)] <- spectra
   
   data <- data[data$sample != "outlier", , drop = FALSE]
   
@@ -95,17 +106,9 @@ for (j in 1:nsim) {
   
   X_train_A <- X_train[, 4:7]
   X_test_A <- X_test[, 4:7]
+  
   X_train_B <- X_train[, 8:ncol(X_train)]
   X_test_B <- X_test[, 8:ncol(X_test)]
-  
-  # Apply Savitzky-Golay filter with specified parameters
-  for (i in 1:nrow(X_train_B)) {
-    X_train_B[i,] <- sgolayfilt(as.matrix(X_train_B[i,]), p = 2, n = 17, m = 1)
-  }
-  
-  for (i in 1:nrow(X_test_B)) {
-    X_test_B[i,] <- sgolayfilt(as.matrix(X_test_B[i,]), p = 2, n = 17, m = 1)
-  }
   
   # Fit the scaler on 'y_train' and transform 'y_train' and 'y_test'
   scaler_y <- scale(y_train)
