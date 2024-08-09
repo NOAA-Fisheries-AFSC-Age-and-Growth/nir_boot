@@ -69,12 +69,6 @@ for (i in 1:ncol(new_ages)) {
   write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
 }
 
-metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
-colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
-metrics[,1] <- 1:nsim
-
-
-
 
 for (j in 1:nsim) {
   # Construct the command to run the external R script
@@ -84,7 +78,15 @@ for (j in 1:nsim) {
   system(command)
 }
 
+metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
+colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
+
 setwd(wd)
+
+for (j in 1:nsim) {
+  read.csv(paste0("./sims/",j,"/Output/Data/metrics",j,".csv"))
+}
+
 write.csv(metrics, 
           file = "./sims/metrics.csv", 
           row.names = FALSE)
