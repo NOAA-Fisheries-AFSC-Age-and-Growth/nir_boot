@@ -1,97 +1,24 @@
-#This script bootstraps the age data and runs the MMCNN for all iterations
-
-library(tidyverse)
-library(tensorflow)
-library(keras3)
-library(kerastuneR)
-library(signal)
-library(ggplot2)
-library(tidyr)
-
-wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
-setwd(wd)
-source(paste0(wd,"/R/Functions.R"))
-
-nsim <- 10
-
-#import TMA age error data, bias columns are (expected age-0.5)
-{
-  TMA_bias <- matrix(ncol=7, nrow = 19)
-  TMA_bias[,1] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,2] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,3] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,4] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,5] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,6] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[5,-1])-0.5)
-  TMA_bias[,7] <- (as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[5,-1])-0.5)
-  colnames(TMA_bias) <- c("bias_R1", "bias_R2", "bias_R3", "bias_R4", "bias_R5", "bias_R6", "bias_R7")
-}
-
-
-{
-  TMA_sd <- matrix(ncol=7, nrow = 19)
-  TMA_sd[,1] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
-  TMA_sd[,2] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
-  TMA_sd[,3] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
-  TMA_sd[,4] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
-  TMA_sd[,5] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
-  TMA_sd[,6] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
-  TMA_sd[,7] <- as.numeric(read.csv("./data/7_reader_TMA_TMB/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
-  colnames(TMA_sd) <- c("SD_R1", "SD_R2", "SD_R3", "SD_R4", "SD_R5", "SD_R6", "SD_R7")
-}
-
-df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
-
-#This chunk won't be needed, need to expand age error mat so it goes out to age 23
-df <- subset(df, final_age <= 18)
-
-input_age <- as.numeric(df$final_age)
-
-set.seed(581)
-new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) #bootstrap age estimates 
-
-dir.create("./sims", showWarnings = FALSE) #creat a folder to store all the sims
-
-split_ratio <- c("training" = 0.8, "test" = 0.2)
-num_training <- floor(length(df[, 2]) * split_ratio["training"])
-num_test <- length(df[, 2]) - num_training
-values <- c(rep("training", num_training), rep("test", num_test))
-
-#replace original age estimates with bootstrap ages and randomly assign test/train
-for (i in 1:ncol(new_ages)) {
-  dir.create(paste0("./sims/",i),showWarnings = FALSE)
-  df$final_age <- new_ages[,i]
-  df[, 2] <- sample(values, size = length(df[, 2]), replace = FALSE)
-  write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
-}
-
-metrics <- matrix(data = NA, nrow = nsim, ncol = 5)
-colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
-metrics[,1] <- 1:nsim
-
-{
-  spectra <- df[, 8:ncol(df)]
-  
-  # Apply Savitzky-Golay filter with specified parameters
-  for (i in 1:nrow(spectra)) {
-    spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
-  }
-}
-
-for (j in 1:nsim) {
   #model adapted from Benson et al. 2023
   #translated from python to R
-  
-  # Clear Keras session and garbage collection
-  keras3::clear_session()
+    
+  library(tidyverse)
+  library(tensorflow)
+  library(keras3)
+  library(kerastuneR)
+  library(ggplot2)
+  library(tidyr)
   
   Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
+  args <- commandArgs(trailingOnly = TRUE)
+  j <- as.numeric(args[1])
+  
+  # Use 'j' in your script as needed
+  message("Running simulation number ", j)
+  
   setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims/",j))
   
   data <- read.csv('./input.csv')
-  
-  data[, 8:ncol(data)] <- spectra
   
   data <- data[data$sample != "outlier", , drop = FALSE]
   
@@ -528,9 +455,3 @@ for (j in 1:nsim) {
   metrics[j,5] <- as.numeric(rmse)
   
   save.image(file = "./Output/workspace.RData")
-}
-
-setwd(wd)
-write.csv(metrics, 
-          file = "./sims/metrics.csv", 
-          row.names = FALSE)
