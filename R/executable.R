@@ -84,7 +84,7 @@ colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RM
 setwd(wd)
 
 for (j in 1:nsim) {
-  read.csv(paste0("./sims/",j,"/Output/Data/metrics",j,".csv"))
+  metrics[j,] <- as.matrix(read.csv(paste0("./sims/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
 }
 
 write.csv(metrics, 
