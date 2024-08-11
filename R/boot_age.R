@@ -1,10 +1,20 @@
-#This script bootstraps the age data and runs the MMCNN for all iterations
+#This script bootstraps the age data iterations
+
+library(signal)
 
 wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 source(paste0(wd,"/R/Functions.R"))
 
-nsim <- 2
+
+# Get command-line arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+# Convert the argument to integer
+nsim <- as.integer(args[1])
+
+# Print the number of simulations
+message("Total simulations files will be created for ", nsim)
 
 #import TMA age error data, bias columns are (expected age-0.5)
 {
@@ -34,17 +44,34 @@ nsim <- 2
 
 df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
 
-input_age <- as.numeric(df$final_age)
+#This chunk won't be needed, need to expand age error mat so it goes out to age 23
+df <- subset(df, final_age <= 18)
 
-set.seed(581)
-new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) #bootstrap age estimates 
 
-dir.create("./sims", showWarnings = FALSE) #creat a folder to store all the sims
-
-#replace original age estimates with bootstrap ages
-for (i in 1:ncol(new_ages)) {
-  dir.create(paste0("./sims/",i),showWarnings = FALSE)
-  df$final_age <- new_ages[,i]
-  write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
+# Apply Savitzky-Golay filter with specified parameters
+spectra <- df[, 8:ncol(df)]
+for (i in 1:nrow(spectra)) {
+  spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
 }
 
+#create an 80:20 training:test split
+split_ratio <- c("training" = 0.8, "test" = 0.2)
+num_training <- floor(length(df[, 2]) * split_ratio["training"])
+num_test <- length(df[, 2]) - num_training
+values <- c(rep("training", num_training), rep("test", num_test))
+
+#bootstrap the age data
+input_age <- as.numeric(df$final_age)
+set.seed(581)
+new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) 
+
+#create a folder to store all the sims
+dir.create("./sims", showWarnings = FALSE) 
+
+for (i in 1:ncol(new_ages)) {
+  dir.create(paste0("./sims/",i),showWarnings = FALSE)
+  df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
+  df[,3] <- new_ages[,i] #replace original age estimates with bootstrap ages
+  df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
+  write.csv(df, paste0("./sims/",i,"/input.csv"), row.names=FALSE)
+}
