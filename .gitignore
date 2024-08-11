@@ -1,6 +1,7 @@
 single_run
 sims
+sims_known
+test_sims
 /single_run
 /sims
 .Rhistory
-test_sims

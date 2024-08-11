@@ -16,7 +16,7 @@ j <- as.numeric(args[1])
 # Use 'j' in your script as needed
 message("Running simulation number ", j)
   
-setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims_err/",j))
+setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims_known/",j))
   
 data <- read.csv('./input.csv')
   
