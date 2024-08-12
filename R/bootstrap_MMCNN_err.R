@@ -12,11 +12,12 @@ Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
 args <- commandArgs(trailingOnly = TRUE)
 j <- as.numeric(args[1])
+wd <- args[2]
 
 # Use 'j' in your script as needed
 message("Running simulation number ", j)
   
-setwd(paste0("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot/sims_err/",j))
+setwd(paste0(wd,"/sims_err/",j))
   
 data <- read.csv('./input.csv')
   

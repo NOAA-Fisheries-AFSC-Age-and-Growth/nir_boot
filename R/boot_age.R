@@ -2,16 +2,16 @@
 
 library(signal)
 
-wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
-setwd(wd)
-source(paste0(wd,"/R/Functions.R"))
-
-
 # Get command-line arguments
 args <- commandArgs(trailingOnly = TRUE)
 
 # Convert the argument to integer
 nsim <- as.integer(args[1])
+wd <- args[2]
+
+setwd(wd)
+source(paste0(wd,"/R/Functions.R"))
+
 
 # Print the number of simulations
 message("Total age error files: ", nsim)
@@ -43,9 +43,8 @@ message("Total age error files: ", nsim)
 }
 
 df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
-df2 <- df
-
 df <- subset(df, !is.na(final_age))
+df2 <- df
 
 # Apply Savitzky-Golay filter with specified parameters
 spectra <- df[, 8:ncol(df)]

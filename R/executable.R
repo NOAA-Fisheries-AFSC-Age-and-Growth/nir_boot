@@ -8,13 +8,13 @@ setwd(wd)
 nsim <-5L
 
 # Construct the command to run the external R script
-command <- sprintf('Rscript ./R/boot_age.R %d', nsim)
+command <- sprintf('Rscript ./R/boot_age.R %d "%s"', nsim, wd)
 # Execute the command
 system(command)
 
 for (j in 1:nsim) {
   # Construct the command to run the external R script
-  command <- sprintf('Rscript ./R/bootstrap_MMCNN_err.R %d', j)
+  command <- sprintf('Rscript ./R/bootstrap_MMCNN_err.R %d "%s"', j, wd)
   
   # Execute the command
   system(command)
@@ -22,7 +22,7 @@ for (j in 1:nsim) {
 
 for (j in 1:nsim) {
   # Construct the command to run the external R script
-  command <- sprintf('Rscript ./R/bootstrap_MMCNN_known.R %d', j)
+  command <- sprintf('Rscript ./R/bootstrap_MMCNN_known.R %d "%s"', j, wd)
   
   # Execute the command
   system(command)
