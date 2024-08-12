@@ -10,6 +10,10 @@ library(tidyr)
 
 Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
+# Check if TensorFlow can access the GPU
+#tf$config$list_physical_devices("GPU")
+#tf$config$experimental$set_memory_growth(tf$config$list_physical_devices("GPU")[[1]], TRUE)
+
 args <- commandArgs(trailingOnly = TRUE)
 j <- as.numeric(args[1])
 wd <- args[2]
