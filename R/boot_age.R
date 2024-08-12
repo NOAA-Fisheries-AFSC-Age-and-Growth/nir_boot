@@ -14,7 +14,7 @@ args <- commandArgs(trailingOnly = TRUE)
 nsim <- as.integer(args[1])
 
 # Print the number of simulations
-message("Total simulations files will be created for ", nsim)
+message("Total age error files: ", nsim)
 
 #import TMA age error data, bias columns are (expected age-0.5)
 {
@@ -74,4 +74,17 @@ for (i in 1:nsim) {
   df[,3] <- new_ages[,i] #replace original age estimates with bootstrap ages
   df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
   write.csv(df, paste0("./sims_err/",i,"/input.csv"), row.names=FALSE)
+}
+
+# Print the number of simulations
+message("Total known age files: ", nsim)
+
+#create a folder to store all the sims
+dir.create("./sims_known", showWarnings = FALSE) 
+
+for (i in 1:nsim) {
+  dir.create(paste0("./sims_known/",i),showWarnings = FALSE)
+  df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
+  df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
+  write.csv(df, paste0("./sims_known/",i,"/input.csv"), row.names=FALSE)
 }
