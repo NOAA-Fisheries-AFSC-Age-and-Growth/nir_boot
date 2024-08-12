@@ -1,12 +1,13 @@
 library(ggplot2)
 library(tidyr)
+library(cowplot)
 
 wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 20
+nsim = 5L
 
 #Ageing Error
 {

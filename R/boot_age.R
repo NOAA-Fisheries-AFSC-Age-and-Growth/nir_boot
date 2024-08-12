@@ -43,6 +43,7 @@ message("Total age error files: ", nsim)
 }
 
 df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
+df2 <- df
 
 #This chunk won't be needed, need to expand age error mat so it goes out to age 23
 df <- subset(df, final_age <= 18)
@@ -81,6 +82,8 @@ message("Total known age files: ", nsim)
 
 #create a folder to store all the sims
 dir.create("./sims_known", showWarnings = FALSE) 
+
+df <- df2
 
 for (i in 1:nsim) {
   dir.create(paste0("./sims_known/",i),showWarnings = FALSE)
