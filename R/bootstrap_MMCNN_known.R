@@ -328,8 +328,8 @@ plot <- ggplot(y_tr_df, aes(x = train, y = pred)) +
   geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
   geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
-  scale_x_continuous(limits = c(-1, 24)) +
-  scale_y_continuous(limits = c(-1, 24)) +
+  scale_x_continuous(limits = c(-1, 30)) +
+  scale_y_continuous(limits = c(-1, 30)) +
   theme_minimal() +
   theme(
     text = element_text(size = 20),
@@ -395,8 +395,8 @@ plot <- ggplot(y_test_df, aes(x = train, y = pred)) +
   geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
   geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
-  scale_x_continuous(limits = c(-1, 24)) +
-  scale_y_continuous(limits = c(-1, 24)) +
+  scale_x_continuous(limits = c(-1, 30)) +
+  scale_y_continuous(limits = c(-1, 30)) +
   theme_minimal() +
   theme(
     text = element_text(size = 20),
