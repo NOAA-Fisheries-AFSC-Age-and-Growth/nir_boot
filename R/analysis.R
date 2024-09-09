@@ -7,7 +7,7 @@ setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 5L
+nsim = 100L
 
 #Ageing Error
 {
@@ -47,7 +47,7 @@ nsim = 5L
   metrics_known <- as.data.frame(metrics_known)
   metrics_known$cumulative_mean_train_R2 <- cumsum(metrics_known$train_R2) / seq_along(metrics_known$train_R2)
   metrics_known$cumulative_mean_test_R2 <- cumsum(metrics_known$test_R2) / seq_along(metrics_known$test_R2)
-  plot(metrics_known$cumulative_mean_train_R2, type = 'l', ylim = c(0.85, 0.89))
+  plot(metrics_known$cumulative_mean_train_R2, type = 'l', ylim = c(0.90, 0.95))
   lines(metrics_known$cumulative_mean_test_R2, type = 'l')
   
   write.csv(metrics_known, 

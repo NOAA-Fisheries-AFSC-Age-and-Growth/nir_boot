@@ -5,7 +5,7 @@ wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 
 
-nsim <-5L
+nsim <-200L
 
 # Construct the command to run the external R script
 command <- sprintf('Rscript ./R/boot_age.R %d "%s"', nsim, wd)
