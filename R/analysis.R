@@ -60,7 +60,7 @@ nsim = 100L
 #NEED TO MODIFY TO ACTUALLY PLOT KNOWN SCENARIO ONCE THAT IS RUN!!!!!
 
 # RMSE Violin Plot
-legend_name <- "Age Scenario"
+legend_name <- "Dataset"
 {
   # Reshape the data
   data_long_RMSE_err <- data_wide_RMSE_err %>%
@@ -78,8 +78,8 @@ legend_name <- "Age Scenario"
       values_to = "Value"               # Name for the new value column
     )
   
-  data_long_RMSE_err$Category <- "Ageing Error"
-  data_long_RMSE_known$Category <- "Known Age"
+  data_long_RMSE_err$Category <- "Age Error"
+  data_long_RMSE_known$Category <- "No Age Error"
   data_long_RMSE <- rbind(data_long_RMSE_err, data_long_RMSE_known)
   
   # Create a violin plot
@@ -90,8 +90,8 @@ legend_name <- "Age Scenario"
       y = "RMSE (y)"
     ) +
     theme_classic() +
-    scale_fill_manual(name = legend_name, values = c("Ageing Error" = "skyblue", "Known Age" = "orange")) +
-    scale_color_manual(name = legend_name,values = c("Ageing Error" = "deepskyblue", "Known Age" = "darkorange")) +
+    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "No Age Error" = "orange")) +
+    scale_color_manual(name = legend_name,values = c("Age Error" = "deepskyblue", "No Age Error" = "darkorange")) +
     scale_x_discrete(
       labels = c(
         "train_RMSE" = "Training", 
@@ -99,12 +99,12 @@ legend_name <- "Age Scenario"
       )
     ) +
     theme(
-      axis.title.x = element_text(size = 14, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 14, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 12),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 12),                        # Y-axis text font size
-      legend.title = element_text(size = 12, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 10)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+      axis.text.y = element_text(size = 16),                        # Y-axis text font size
+      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+      legend.text = element_text(size = 16)                         # Legend text font size
     )
 }
 
@@ -126,8 +126,8 @@ legend_name <- "Age Scenario"
       values_to = "Value"               # Name for the new value column
     )
   
-  data_long_R2_err$Category <- "Ageing Error"
-  data_long_R2_known$Category <- "Known Age"
+  data_long_R2_err$Category <- "Age Error"
+  data_long_R2_known$Category <- "No Age Error"
   data_long_R2 <- rbind(data_long_R2_err, data_long_R2_known)
   
   # Create a violin plot
@@ -138,8 +138,8 @@ legend_name <- "Age Scenario"
       y = expression(R^2)  # Use expression() to make 2 a superscript
     ) +
     theme_classic() +
-    scale_fill_manual(name = legend_name, values = c("Ageing Error" = "skyblue", "Known Age" = "orange")) +
-    scale_color_manual(name = legend_name, values = c("Ageing Error" = "deepskyblue", "Known Age" = "darkorange")) +
+    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "No Age Error" = "orange")) +
+    scale_color_manual(name = legend_name, values = c("Age Error" = "deepskyblue", "No Age Error" = "darkorange")) +
     scale_x_discrete(
       labels = c(
         "train_R2" = "Training", 
@@ -147,12 +147,12 @@ legend_name <- "Age Scenario"
       )
     ) +
     theme(
-      axis.title.x = element_text(size = 14, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 14, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 12),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 12),                        # Y-axis text font size
-      legend.title = element_text(size = 12, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 10)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+      axis.text.y = element_text(size = 16),                        # Y-axis text font size
+      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+      legend.text = element_text(size = 16)                         # Legend text font size
     )
 }
 
@@ -174,7 +174,7 @@ combined_plot <- ggdraw() +
     x = 0.5,
     y = 0.025,  # Adjust based on plot height
     hjust = 0.5,
-    size = 14,
+    size = 20,
     fontface = "bold"
   )
 
