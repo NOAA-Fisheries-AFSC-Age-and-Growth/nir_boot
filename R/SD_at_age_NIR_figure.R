@@ -1,6 +1,7 @@
 library(ggplot2)
 library(tidyr)
 library(cowplot)
+library(dplyr)
 
 wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
@@ -56,10 +57,10 @@ max_age = 10
   SD_mat_test$Source <- "Test"
   SD_mat_train$Source <- "Train"
   
-  combined_data <- rbind(SD_mat_test, SD_mat_train)
+  combined_data_err <- rbind(SD_mat_test, SD_mat_train)
   
   library(tidyr)
-  long_data <- pivot_longer(combined_data, cols = -Source, names_to = "Age", values_to = "Value")
+  long_data <- pivot_longer(combined_data_err, cols = -Source, names_to = "Age", values_to = "Value")
   
   # Make sure the Age column is treated as a factor
   long_data$Age <- factor(long_data$Age, levels = unique(long_data$Age))
@@ -73,12 +74,12 @@ max_age = 10
     scale_fill_manual(name = legend_name, values = c("Test" = "skyblue", "Train" = "orange")) +
     scale_color_manual(name = legend_name, values = c("Test" = "deepskyblue", "Train" = "darkorange")) +
     theme(
-      axis.title.x = element_text(size = 14, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 14, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 12),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 12),                        # Y-axis text font size
-      legend.title = element_text(size = 12, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 10)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+      axis.text.y = element_text(size = 16),                        # Y-axis text font size
+      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+      legend.text = element_text(size = 16)                         # Legend text font size
     )
 }
 
@@ -127,10 +128,10 @@ max_age = 10
   SD_mat_test$Source <- "Test"
   SD_mat_train$Source <- "Train"
   
-  combined_data <- rbind(SD_mat_test, SD_mat_train)
+  combined_data_known <- rbind(SD_mat_test, SD_mat_train)
   
   library(tidyr)
-  long_data <- pivot_longer(combined_data, cols = -Source, names_to = "Age", values_to = "Value")
+  long_data <- pivot_longer(combined_data_known, cols = -Source, names_to = "Age", values_to = "Value")
   
   # Make sure the Age column is treated as a factor
   long_data$Age <- factor(long_data$Age, levels = unique(long_data$Age))
@@ -144,12 +145,12 @@ max_age = 10
     scale_fill_manual(name = legend_name, values = c("Test" = "skyblue", "Train" = "orange")) +
     scale_color_manual(name = legend_name, values = c("Test" = "deepskyblue", "Train" = "darkorange")) +
     theme(
-      axis.title.x = element_text(size = 14, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 14, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 12),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 12),                        # Y-axis text font size
-      legend.title = element_text(size = 12, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 10)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+      axis.text.y = element_text(size = 16),                        # Y-axis text font size
+      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+      legend.text = element_text(size = 16)                         # Legend text font size
     )
 }
 
@@ -179,4 +180,52 @@ combined_plot <- ggdraw() +
 # Display the combined plot
 print(combined_plot)
 # Save the plot
-ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave(filename = './Output/Violin_SD_at_Age.png', plot = combined_plot, width = 12, height = 8, units = "in", dpi = 300)
+
+#Test Known and Error Plot
+combined_data_known <- combined_data_known %>%
+  mutate(Source = case_when(
+    Source == "Test" ~ "Test-Known",
+    Source == "Train" ~ "Train-Known",
+    TRUE ~ Source
+  ))
+combined_data_err <- combined_data_err %>%
+  mutate(Source = case_when(
+    Source == "Test" ~ "Test-Err",
+    Source == "Train" ~ "Train-Err",
+    TRUE ~ Source
+  ))
+
+test <- rbind(subset(combined_data_known, Source == "Test-Known"), subset(combined_data_err, Source == "Test-Err"))
+test <- test %>%
+  mutate(Source = case_when(
+    Source == "Test-Err" ~ "Age Error",
+    Source == "Test-Known" ~ "Known Age",
+    TRUE ~ Source
+  ))
+
+
+long_data <- pivot_longer(test, cols = -Source, names_to = "Age", values_to = "Value")
+
+# Make sure the Age column is treated as a factor
+long_data$Age <- factor(long_data$Age, levels = unique(long_data$Age))
+
+test_plot <- ggplot(long_data, aes(x = Age, y = Value, fill = Source, color = Source)) +
+  geom_violin(position = position_dodge(width = 0.9), trim = FALSE, linewidth = 0.75, alpha = 0.5) +
+  labs(x = "Age y",
+       y = "SD y") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_classic() +
+  scale_fill_manual(name = legend_name, values = c("Known Age" = "skyblue", "Age Error" = "orange")) +
+  scale_color_manual(name = legend_name, values = c("Known Age" = "deepskyblue", "Age Error" = "darkorange")) +
+  theme(
+    axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+    axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+    axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+    axis.text.y = element_text(size = 16),                        # Y-axis text font size
+    legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+    legend.text = element_text(size = 16)                         # Legend text font size
+  )+
+  coord_cartesian(ylim = c(0, 3))
+print(test_plot)
+ggsave(filename = './Output/Violin_Test_SD_at_Age.png', plot = test_plot, width = 16, height = 8, units = "in", dpi = 300)
