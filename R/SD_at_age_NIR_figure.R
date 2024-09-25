@@ -324,7 +324,7 @@ ggsave(filename = './Output/Violin_Test_SD_at_Age.png', plot = test_plot, width 
     NIR_boot_long %>% mutate(Type = "NIR_Boot")
   )
   
-  combined_df <- subset(combined_df, Age <= 18)
+  combined_df <- subset(combined_df, Age <= 17.25)
   
   TMA_NIR_NIR_Boot_plot<- ggplot(combined_df, aes(x = Age, y = Value, color = Type, shape = Type)) +
     geom_point(size = 6) +
@@ -345,6 +345,30 @@ ggsave(filename = './Output/Violin_Test_SD_at_Age.png', plot = test_plot, width 
     coord_cartesian(ylim = c(0, 3), xlim = c(0, 20))
   print(TMA_NIR_NIR_Boot_plot)
   ggsave(filename = './Output/TMA_NIR_NIR_Boot_SD_Summary_3.png', plot = TMA_NIR_NIR_Boot_plot, width = 16, height = 8, units = "in", dpi = 300)
+  
+  
+  combined_df_2 <- subset(combined_df, Type != "NIR")
+  
+  TMA_NIR_NIR_Boot_plot<- ggplot(combined_df_2, aes(x = Age, y = Value, color = Type, shape = Type)) +
+    geom_point(size = 6) +
+    geom_errorbar(aes(ymin = Value - 1.96 * SE, ymax = Value + 1.96 * SE), width = 0.5, size = 1) +
+    scale_color_manual(values = c("TMA" = "skyblue", "NIR_Boot" = "springgreen3")) +
+    scale_shape_manual(values = c("TMA" = 16, "NIR_Boot" = 17)) +
+    labs(x = "Age y", y = "SD") +
+    theme_classic() +
+    theme(legend.title = element_blank())+
+    theme(
+      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
+      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
+      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
+      axis.text.y = element_text(size = 16),                        # Y-axis text font size
+      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
+      legend.text = element_text(size = 16)                         # Legend text font size
+    )+
+    coord_cartesian(ylim = c(0, 3), xlim = c(0, 20))
+  print(TMA_NIR_NIR_Boot_plot)
+  ggsave(filename = './Output/TMA_NIR_NIR_Boot_SD_Summary_4.png', plot = TMA_NIR_NIR_Boot_plot, width = 16, height = 8, units = "in", dpi = 300)
+  
   
   combined_df <- subset(combined_df, Type != "NIR_Boot")
   
