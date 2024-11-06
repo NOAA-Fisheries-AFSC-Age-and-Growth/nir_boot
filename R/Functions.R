@@ -9,9 +9,9 @@ samp_age <- function(input_age, nreaders, bias_mat, sd_mat){
 }
 
 boot_age <- function(n_boot, input_age, bias_mat, sd_mat){
-  new_ages <- matrix(nrow = length(input_age), ncol = n_boot)
+  new_ages <- matrix(nrow = length(input_age), ncol = max(n_boot))
   
-  for (i in 1:n_boot) {
+  for (i in n_boot) {
     new_ages[,i]<- samp_age(input_age, ncol(bias_mat), bias_mat, sd_mat)
   }
   

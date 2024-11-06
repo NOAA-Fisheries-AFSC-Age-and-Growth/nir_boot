@@ -60,12 +60,12 @@ set.seed(581)
 new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) 
 
 # Print the number of simulations
-message("Total age error files: ", nsim)
+message("Total age error files: ", length(nsim))
 
 #create a folder to store all the sims
 dir.create("./sims_err", showWarnings = FALSE) 
 
-for (i in 1:nsim) {
+for (i in nsim) {
   dir.create(paste0("./sims_err/",i),showWarnings = FALSE)
   df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
   df[,3] <- new_ages[,i] #replace original age estimates with bootstrap ages
@@ -75,14 +75,14 @@ for (i in 1:nsim) {
 }
 
 # Print the number of simulations
-message("Total known age files: ", nsim)
+message("Total known age files: ", length(nsim))
 
 #create a folder to store all the sims
 dir.create("./sims_known", showWarnings = FALSE) 
 
 df <- df2
 
-for (i in 1:nsim) {
+for (i in nsim) {
   dir.create(paste0("./sims_known/",i),showWarnings = FALSE)
   df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
   df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
