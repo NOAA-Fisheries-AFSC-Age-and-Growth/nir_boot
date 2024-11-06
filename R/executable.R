@@ -1,19 +1,17 @@
 #This script prepares all the data and folder structure then executes the MMCNN
 #R script in a for loop
 
-wd <- "~/nir_boot"
-#wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
+#wd <- "~/nir_boot"
+wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 
+source(paste0(wd,"/R/Functions.R"))
 
 nsim <-101L:103L
 
-# Construct the command to run the external R script
-command <- sprintf('Rscript ./R/boot_age.R %d "%s"', nsim, wd)
-# Execute the command
-system(command)
+age_files(nsim, wd)
 
-for (j in 1:nsim) {
+for (j in nsim) {
   # Construct the command to run the external R script
   command <- sprintf('Rscript ./R/bootstrap_MMCNN_err.R %d "%s"', j, wd)
   
@@ -21,7 +19,7 @@ for (j in 1:nsim) {
   system(command)
 }
 
-for (j in 1:nsim) {
+for (j in nsim) {
   # Construct the command to run the external R script
   command <- sprintf('Rscript ./R/bootstrap_MMCNN_known.R %d "%s"', j, wd)
   
