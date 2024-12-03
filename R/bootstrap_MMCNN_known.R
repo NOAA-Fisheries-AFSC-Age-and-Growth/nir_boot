@@ -17,13 +17,16 @@ Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 args <- commandArgs(trailingOnly = TRUE)
 j <- as.numeric(args[1])
 wd <- args[2]
-
+  
 # Use 'j' in your script as needed
 message("Running simulation number ", j)
   
 setwd(paste0(wd,"/sims_known/",j))
   
 data <- read.csv('./input.csv')
+spectra <- read.csv(paste0(wd,"/data/spectra_sav_golay.csv"))
+
+data <- cbind(data,spectra)
   
 data <- data[data$sample != "outlier", , drop = FALSE]
   

@@ -4,5 +4,6 @@ sims_known
 test_sims
 /single_run
 /sims
+/data/spectra_sav_golay.csv
 .Rhistory
 Output

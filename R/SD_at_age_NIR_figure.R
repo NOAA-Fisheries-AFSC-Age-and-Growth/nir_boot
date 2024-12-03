@@ -8,9 +8,9 @@ setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 100L
+nsim = 200L
 
-max_age = 10
+max_age = 15
 
 #Ageing Error
 {
@@ -235,24 +235,24 @@ ggsave(filename = './Output/Violin_Test_SD_at_Age.png', plot = test_plot, width 
 {
   {
     TMA_sd <- matrix(ncol=7, nrow = 24)
-    TMA_sd[,1] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
-    TMA_sd[,2] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
-    TMA_sd[,3] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
-    TMA_sd[,4] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
-    TMA_sd[,5] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
-    TMA_sd[,6] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
-    TMA_sd[,7] <- as.numeric(read.csv("./data/7_reader_TMA_TMB_Age_23/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
+    TMA_sd[,1] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
+    TMA_sd[,2] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
+    TMA_sd[,3] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
+    TMA_sd[,4] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
+    TMA_sd[,5] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
+    TMA_sd[,6] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
+    TMA_sd[,7] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
     colnames(TMA_sd) <- c("SD_R1", "SD_R2", "SD_R3", "SD_R4", "SD_R5", "SD_R6", "SD_R7")
   }
   
   {
-    NIR_sd <- matrix(ncol=6, nrow = 19)
-    NIR_sd[,1] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader2.csv", header=TRUE)[4,-1])
-    NIR_sd[,2] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader3.csv", header=TRUE)[4,-1])
-    NIR_sd[,3] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader4.csv", header=TRUE)[4,-1])
-    NIR_sd[,4] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader5.csv", header=TRUE)[4,-1])
-    NIR_sd[,5] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader6.csv", header=TRUE)[4,-1])
-    NIR_sd[,6] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Tester/NIR/Results/Mod_Age SS3_format_Reader7.csv", header=TRUE)[4,-1])
+    NIR_sd <- matrix(ncol=6, nrow = 24)
+    NIR_sd[,1] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader2.csv", header=TRUE)[4,-1])
+    NIR_sd[,2] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader3.csv", header=TRUE)[4,-1])
+    NIR_sd[,3] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader4.csv", header=TRUE)[4,-1])
+    NIR_sd[,4] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader5.csv", header=TRUE)[4,-1])
+    NIR_sd[,5] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader6.csv", header=TRUE)[4,-1])
+    NIR_sd[,6] <- as.numeric(read.csv("C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/Age_Error_Matrices/Cumulative_FTNIR_TMA/NIR/Results/Mod_Age SS3_format_Reader7.csv", header=TRUE)[4,-1])
     colnames(NIR_sd) <- c("SD_NIR1", "SD_NIR2", "SD_NIR3", "SD_NIR4", "SD_NIR5", "SD_NIR6")
   }
   

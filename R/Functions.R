@@ -61,6 +61,8 @@ age_files <- function(nsim, wd){
     spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
   }
   
+  write.csv(spectra, "./data/spectra_sav_golay.csv", row.names=FALSE)
+  
   message("Sav-Golay Complete")
   
   #create an 80:20 training:test split
@@ -80,11 +82,14 @@ age_files <- function(nsim, wd){
   #create a folder to store all the sims
   dir.create("./sims_err", showWarnings = FALSE) 
   
+  df <- df[,1:7]
+  
+  set.seed(581)
   for (i in nsim) {
     dir.create(paste0("./sims_err/",i),showWarnings = FALSE)
     df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
     df[,3] <- new_ages[,i] #replace original age estimates with bootstrap ages
-    df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
+    #df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
     #df[, 3][df[, 3] == 0] <- 1 #change age 0 to age 1, only test purposes
     write.csv(df, paste0("./sims_err/",i,"/input.csv"), row.names=FALSE)
   }
@@ -95,12 +100,13 @@ age_files <- function(nsim, wd){
   #create a folder to store all the sims
   dir.create("./sims_known", showWarnings = FALSE) 
   
-  df <- df2
+  df <- df2[,1:7]
   
+  set.seed(581)
   for (i in nsim) {
     dir.create(paste0("./sims_known/",i),showWarnings = FALSE)
     df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
-    df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
+    #df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
     write.csv(df, paste0("./sims_known/",i,"/input.csv"), row.names=FALSE)
   }
   

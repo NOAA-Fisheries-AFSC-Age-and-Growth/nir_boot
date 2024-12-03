@@ -7,7 +7,7 @@ setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 100L
+nsim = 200L
 
 #Ageing Error
 {

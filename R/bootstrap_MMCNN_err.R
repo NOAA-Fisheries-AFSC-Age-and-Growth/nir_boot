@@ -24,7 +24,10 @@ message("Running simulation number ", j)
 setwd(paste0(wd,"/sims_err/",j))
   
 data <- read.csv('./input.csv')
-  
+spectra <- read.csv(paste0(wd,"/data/spectra_sav_golay.csv"))
+
+data <- cbind(data,spectra)
+
 data <- data[data$sample != "outlier", , drop = FALSE]
   
 names(data)[names(data) == "final_age"] <- "Age"
