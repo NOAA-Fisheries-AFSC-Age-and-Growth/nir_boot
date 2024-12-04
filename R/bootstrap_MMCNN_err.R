@@ -222,7 +222,6 @@ r2_score <- function(y_true, y_pred) {
 r2 <- r2_score(y_test, preds)
 print(paste("R² Score:", r2))
 
-
 # Convert predictions and true values to a data frame
 plot_data <- data.frame(
   True = as.vector(y_test),
@@ -248,13 +247,6 @@ summary(best_model)
 
 # Predict using the model, training data
 preds_t <- best_model %>% predict(list(X_train_A, X_train_B))
-
-# Calculate R^2 score
-r2_score <- function(actual, predicted) {
-  ss_total <- sum((actual - mean(actual))^2)
-  ss_residual <- sum((actual - predicted)^2)
-  1 - (ss_residual / ss_total)
-}
 
 # Assuming y_train and preds_t are vectors of the same length
 r2 <- r2_score(y_train, preds_t)
@@ -474,11 +466,8 @@ print(plot)
   # Display the first few rows of the resulting data frame
   head(y_tr_df_known, 2)
   
-  dir.create('./Output/Data', recursive = TRUE, showWarnings = FALSE)
-  dir.create('./Output/Figures', showWarnings = FALSE)
-  
   # Save data frame to CSV file
-  write.csv(y_tr_df_known, file = './Output/Data/train_predictions.csv', row.names = FALSE)
+  write.csv(y_tr_df_known, file = './Output/Data/train_predictions_known.csv', row.names = FALSE)
   
   # Create the plot
   plot <- ggplot(y_tr_df_known, aes(x = train, y = pred)) +
@@ -505,7 +494,7 @@ print(plot)
     )
   
   # Save the plot
-  ggsave(filename = "./Output/Figures/TrainingSet.png", plot = plot, width = 12, height = 12, units = "in", dpi = 300)
+  ggsave(filename = "./Output/Figures/TrainingSet_Known.png", plot = plot, width = 12, height = 12, units = "in", dpi = 300)
   
   # Print the plot
   print(plot)
@@ -521,7 +510,7 @@ print(plot)
   head(y_test_df_known, 2)
   
   # Save data frame to CSV file
-  write.csv(y_test_df_known, file = './Output/Data/test_predictions.csv', row.names = FALSE)
+  write.csv(y_test_df_known, file = './Output/Data/test_predictions_known.csv', row.names = FALSE)
   
   # Create the plot
   plot <- ggplot(y_test_df_known, aes(x = train, y = pred)) +
@@ -583,7 +572,7 @@ print(plot)
     )
   
   # Save the plot
-  ggsave(filename = './Output/Figures/BlandAltman.png', plot = plot, width = 12, height = 8, units = "in", dpi = 300)
+  ggsave(filename = './Output/Figures/BlandAltman_Known.png', plot = plot, width = 12, height = 8, units = "in", dpi = 300)
   
   # Print the plot
   print(plot)
@@ -595,14 +584,14 @@ print(plot)
   rmse_known <- rmse_manual(test_known, y_pred_transformed)
 }
 
-metrics <- matrix(data = NA, nrow = 1, ncol = 5)
-colnames(metrics) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
+metrics <- matrix(data = NA, nrow = 1, ncol = 9)
+colnames(metrics) <- c("iteration","train_R2_known", "train_RMSE_known", "test_R2_known", "test_RMSE_known",
+                       "train_R2", "train_RMSE", "test_R2", "test_RMSE")
 metrics[1,1] <- j
-
-metrics[1,2] <- as.numeric(r_squared_tr_known)
-metrics[1,3] <- as.numeric(rmse_tr_known)
-metrics[1,4] <- as.numeric(r_squared_known)
-metrics[1,5] <- as.numeric(rmse_known)
+metrics[1,2] <- r_squared_tr_known
+metrics[1,3] <- rmse_tr_known
+metrics[1,4] <- r_squared_known
+metrics[1,5] <- rmse_known
 metrics[1,6] <- as.numeric(r_squared_tr)
 metrics[1,7] <- as.numeric(rmse_tr)
 metrics[1,8] <- as.numeric(r_squared)
@@ -612,4 +601,4 @@ write.csv(metrics,
           file = paste0("./Output/Data/metrics",j,".csv"), 
           row.names = FALSE)
 
-save.image(file = "./Output/workspace.RData")
+#save.image(file = "./Output/workspace.RData")

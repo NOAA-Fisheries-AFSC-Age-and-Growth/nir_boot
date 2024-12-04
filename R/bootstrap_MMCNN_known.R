@@ -222,7 +222,6 @@ r2_score <- function(y_true, y_pred) {
 r2 <- r2_score(y_test, preds)
 print(paste("R² Score:", r2))
 
-
 # Convert predictions and true values to a data frame
 plot_data <- data.frame(
   True = as.vector(y_test),
@@ -248,13 +247,6 @@ summary(best_model)
 
 # Predict using the model, training data
 preds_t <- best_model %>% predict(list(X_train_A, X_train_B))
-
-# Calculate R^2 score
-r2_score <- function(actual, predicted) {
-  ss_total <- sum((actual - mean(actual))^2)
-  ss_residual <- sum((actual - predicted)^2)
-  1 - (ss_residual / ss_total)
-}
 
 # Assuming y_train and preds_t are vectors of the same length
 r2 <- r2_score(y_train, preds_t)
@@ -470,4 +462,4 @@ write.csv(metrics,
           file = paste0("./Output/Data/metrics",j,".csv"), 
           row.names = FALSE)
 
-save.image(file = "./Output/workspace.RData")
+#save.image(file = "./Output/workspace.RData")
