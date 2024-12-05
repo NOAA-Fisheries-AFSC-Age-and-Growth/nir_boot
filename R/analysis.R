@@ -57,25 +57,21 @@ nsim = 200L
 
 
 
-#NEED TO MODIFY TO ACTUALLY PLOT KNOWN SCENARIO ONCE THAT IS RUN!!!!!
-
 # RMSE Violin Plot
-legend_name <- "Dataset"
+legend_name <- "Model"
 {
-  # Reshape the data
   data_long_RMSE_err <- data_wide_RMSE_err %>%
     pivot_longer(
-      cols = starts_with(c("train", "test")),  # Select columns that start with "train" or "test"
-      names_to = "Variable",            # Name for the new key column
-      values_to = "Value"               # Name for the new value column
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
     )
   
-  # Reshape the data
   data_long_RMSE_known <- data_wide_RMSE_known %>%
     pivot_longer(
-      cols = starts_with(c("train", "test")),  # Select columns that start with "train" or "test"
-      names_to = "Variable",            # Name for the new key column
-      values_to = "Value"               # Name for the new value column
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
     )
   
   data_long_RMSE_err$Category <- "Age Error"
@@ -90,8 +86,8 @@ legend_name <- "Dataset"
       y = "RMSE (y)"
     ) +
     theme_classic() +
-    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "No Age Error" = "orange")) +
-    scale_color_manual(name = legend_name,values = c("Age Error" = "deepskyblue", "No Age Error" = "darkorange")) +
+    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "Null" = "orange")) +
+    scale_color_manual(name = legend_name,values = c("Age Error" = "deepskyblue", "Null" = "darkorange")) +
     scale_x_discrete(
       labels = c(
         "train_RMSE" = "Training", 
@@ -99,31 +95,29 @@ legend_name <- "Dataset"
       )
     ) +
     theme(
-      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 16),                        # Y-axis text font size
-      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 16)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),
+      axis.title.y = element_text(size = 20, face = "bold"),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      legend.title = element_text(size = 20, face = "bold"),
+      legend.text = element_text(size = 16)
     )
 }
 
 # R2 Violin Plot
 {
-  # Reshape the data
   data_long_R2_err <- data_wide_R2_err %>%
     pivot_longer(
-      cols = starts_with(c("train", "test")),  # Select columns that start with "train" or "test"
-      names_to = "Variable",            # Name for the new key column
-      values_to = "Value"               # Name for the new value column
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
     )
   
-  # Reshape the data
   data_long_R2_known <- data_wide_R2_known %>%
     pivot_longer(
-      cols = starts_with(c("train", "test")),  # Select columns that start with "train" or "test"
-      names_to = "Variable",            # Name for the new key column
-      values_to = "Value"               # Name for the new value column
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
     )
   
   data_long_R2_err$Category <- "Age Error"
@@ -135,7 +129,7 @@ legend_name <- "Dataset"
     geom_violin(trim = FALSE, linewidth = 1.25, alpha = 0.5) +
     labs(
       x = "",
-      y = expression(R^2)  # Use expression() to make 2 a superscript
+      y = expression(R^2)
     ) +
     theme_classic() +
     scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "No Age Error" = "orange")) +
@@ -147,12 +141,12 @@ legend_name <- "Dataset"
       )
     ) +
     theme(
-      axis.title.x = element_text(size = 20, face = "bold"),       # X-axis title font size and bold
-      axis.title.y = element_text(size = 20, face = "bold"),       # Y-axis title font size and bold
-      axis.text.x = element_text(size = 16),  # X-axis text font size and rotation
-      axis.text.y = element_text(size = 16),                        # Y-axis text font size
-      legend.title = element_text(size = 20, face = "bold"),        # Legend title font size and bold
-      legend.text = element_text(size = 16)                         # Legend text font size
+      axis.title.x = element_text(size = 20, face = "bold"),
+      axis.title.y = element_text(size = 20, face = "bold"),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      legend.title = element_text(size = 20, face = "bold"),
+      legend.text = element_text(size = 16)
     )
 }
 
@@ -172,13 +166,66 @@ combined_plot <- ggdraw() +
   draw_label(
     "Dataset",
     x = 0.5,
-    y = 0.025,  # Adjust based on plot height
+    y = 0.025,
     hjust = 0.5,
     size = 20,
     fontface = "bold"
   )
 
-# Display the combined plot
 print(combined_plot)
-# Save the plot
+
 ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, height = 8, units = "in", dpi = 300)
+
+
+#boxplot figure
+{
+  all_model1_pred <- c()
+  all_model2_pred <- c()
+  all_model1_actual <- c()
+  all_model2_actual <- c()
+  
+  for (i in 1:nsim) {
+    model1_file <- paste0("./sims_known/", i, "/Output/Data/test_predictions.csv")
+    model2_file <- paste0("./sims_err/", i, "/Output/Data/test_predictions.csv")
+    
+    model1_pred <- read.csv(model1_file)[, 2]
+    model2_pred <- read.csv(model2_file)[, 2]
+    model1_actual <- read.csv(model1_file)[, 1]
+    model2_actual <- read.csv(model2_file)[, 1]
+    
+    all_model1_pred <- c(all_model1_pred, model1_pred)
+    all_model2_pred <- c(all_model2_pred, model2_pred)
+    all_model1_actual <- c(all_model1_actual, model1_actual)
+    all_model2_actual <- c(all_model2_actual, model2_actual)
+  }
+  
+  # Combine the true values and predictions into a long format dataframe
+  comparison_long <- data.frame(
+    TrueAge = c(rep(all_model1_actual, 2), all_model2_actual),
+    PredictedAge = c(all_model1_pred, all_model2_pred, all_model2_pred),
+    Model = rep(c("Null", "Age Error v Null", "Age Error"), each = length(all_model1_actual)*nsim)
+  )
+  
+  box_plot <- ggplot(comparison_long, aes(x = as.factor(TrueAge), y = PredictedAge, fill = Model)) +
+    geom_boxplot(outlier.size = 1.75, size = 0.75) +
+    geom_abline(slope = 1, intercept = 0, color = "black", linetype = "dashed") + 
+    labs(x = "Reference age y",
+         y = "FT-NIR Age y") +
+    scale_fill_manual(name = "Model", values = c("Null" = "orange", "Age Error" = "skyblue", "Age Error v Null" = "springgreen3")) +
+    scale_y_continuous(breaks = seq(0, 24, by = 2), limits = c(0, 24), expand = c(0, 0)) +
+    scale_x_discrete(breaks = seq(0, 24, by = 2), limits = as.factor(1:24), expand = c(0, 0)) +
+    expand_limits(x = 0, y = 0)+
+    theme_classic() +
+    theme(
+      axis.title.x = element_text(size = 20, face = "bold"),
+      axis.title.y = element_text(size = 20, face = "bold"),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      legend.title = element_text(size = 20, face = "bold"),
+      legend.text = element_text(size = 16)
+    )
+  
+  print(box_plot)
+
+  ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, height = 8, units = "in", dpi = 300)
+}
