@@ -28,26 +28,26 @@ age_files <- function(nsim, wd){
   #import TMA age error data, bias columns are (expected age-0.5)
   {
     TMA_bias <- matrix(ncol=7, nrow = 24)
-    TMA_bias[,1] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,2] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,3] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,4] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,5] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,6] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,7] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,1] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,2] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,3] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,4] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,5] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,6] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[5,-1])-0.5)
+    TMA_bias[,7] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[5,-1])-0.5)
     colnames(TMA_bias) <- c("bias_R1", "bias_R2", "bias_R3", "bias_R4", "bias_R5", "bias_R6", "bias_R7")
   }
   
   
   {
     TMA_sd <- matrix(ncol=7, nrow = 24)
-    TMA_sd[,1] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
-    TMA_sd[,2] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
-    TMA_sd[,3] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
-    TMA_sd[,4] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
-    TMA_sd[,5] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
-    TMA_sd[,6] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
-    TMA_sd[,7] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_AIC_Selected/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
+    TMA_sd[,1] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
+    TMA_sd[,2] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
+    TMA_sd[,3] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
+    TMA_sd[,4] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
+    TMA_sd[,5] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
+    TMA_sd[,6] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
+    TMA_sd[,7] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
     colnames(TMA_sd) <- c("SD_R1", "SD_R2", "SD_R3", "SD_R4", "SD_R5", "SD_R6", "SD_R7")
   }
   

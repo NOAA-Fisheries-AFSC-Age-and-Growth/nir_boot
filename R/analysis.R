@@ -7,19 +7,24 @@ setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 200L
+nsim = 10L
 
 #Ageing Error
 {
-  metrics_err <- matrix(data = NA, nrow = nsim, ncol = 5)
-  colnames(metrics_err) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
+  metrics_err <- matrix(data = NA, nrow = nsim, ncol = 9)
+  colnames(metrics_err) <- c("iteration", "train_R2_known", "train_RMSE_known",
+                             "test_R2_known", "test_RMSE_known", "train_R2",
+                             "train_RMSE", "test_R2", "test_RMSE")
   
   for (j in 1:nsim) {
     metrics_err[j,] <- as.matrix(read.csv(paste0("./sims_err/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
   }
   
-  data_wide_R2_err <- as.data.frame(metrics_err[,c(1,2,4)])
-  data_wide_RMSE_err <- as.data.frame(metrics_err[,c(1,3,5)])
+  data_wide_R2_err <- as.data.frame(metrics_err[,c(1,6,8)])
+  data_wide_RMSE_err <- as.data.frame(metrics_err[,c(1,7,9)])
+  
+  data_wide_R2_err_known <- as.data.frame(metrics_err[,c(1,2,4)])
+  data_wide_RMSE_err_known <- as.data.frame(metrics_err[,c(1,3,5)])
   
   metrics_err <- as.data.frame(metrics_err)
   metrics_err$cumulative_mean_train_R2 <- cumsum(metrics_err$train_R2) / seq_along(metrics_err$train_R2)
@@ -55,7 +60,11 @@ nsim = 200L
             row.names = FALSE)
 }
 
+colnames(data_wide_RMSE_err_known)[colnames(data_wide_RMSE_err_known) == "test_RMSE_known"] <- "test_RMSE"
+colnames(data_wide_RMSE_err_known)[colnames(data_wide_RMSE_err_known) == "train_RMSE_known"] <- "train_RMSE"
 
+colnames(data_wide_R2_err_known)[colnames(data_wide_R2_err_known) == "test_R2_known"] <- "test_R2"
+colnames(data_wide_R2_err_known)[colnames(data_wide_R2_err_known) == "train_R2_known"] <- "train_R2"
 
 # RMSE Violin Plot
 legend_name <- "Model"
@@ -74,9 +83,19 @@ legend_name <- "Model"
       values_to = "Value"
     )
   
+  data_long_RMSE_err_known <- data_wide_RMSE_err_known %>%
+    pivot_longer(
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
+    )
+  
   data_long_RMSE_err$Category <- "Age Error"
-  data_long_RMSE_known$Category <- "No Age Error"
-  data_long_RMSE <- rbind(data_long_RMSE_err, data_long_RMSE_known)
+  data_long_RMSE_known$Category <- "Null"
+  data_long_RMSE_err_known$Category <- "Age Error v Null"
+  
+  data_long_RMSE <- rbind(data_long_RMSE_known, data_long_RMSE_err, data_long_RMSE_err_known)
+  data_long_RMSE$Category <- factor(data_long_RMSE$Category, levels = c("Null", "Age Error", "Age Error v Null"))
   
   # Create a violin plot
   RMSE_plot <- ggplot(data_long_RMSE, aes(x = Variable, y = Value, fill = Category, color = Category)) +
@@ -86,8 +105,8 @@ legend_name <- "Model"
       y = "RMSE (y)"
     ) +
     theme_classic() +
-    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "Null" = "orange")) +
-    scale_color_manual(name = legend_name,values = c("Age Error" = "deepskyblue", "Null" = "darkorange")) +
+    scale_fill_manual(name = legend_name, values = c("Null" = "orange", "Age Error" = "skyblue", "Age Error v Null" = "springgreen3")) +
+    scale_color_manual(name = legend_name,values = c("Null" = "darkorange", "Age Error" = "deepskyblue", "Age Error v Null" = "springgreen4")) +
     scale_x_discrete(
       labels = c(
         "train_RMSE" = "Training", 
@@ -120,9 +139,19 @@ legend_name <- "Model"
       values_to = "Value"
     )
   
+  data_long_R2_err_known <- data_wide_R2_err_known %>%
+    pivot_longer(
+      cols = starts_with(c("train", "test")),
+      names_to = "Variable",
+      values_to = "Value"
+    )
+  
   data_long_R2_err$Category <- "Age Error"
-  data_long_R2_known$Category <- "No Age Error"
-  data_long_R2 <- rbind(data_long_R2_err, data_long_R2_known)
+  data_long_R2_known$Category <- "Null"
+  data_long_R2_err_known$Category <- "Age Error v Null"
+  
+  data_long_R2 <- rbind(data_long_R2_known, data_long_R2_err, data_long_R2_err_known)
+  data_long_R2$Category <- factor(data_long_R2$Category, levels = c("Null", "Age Error", "Age Error v Null"))
   
   # Create a violin plot
   R2_plot <- ggplot(data_long_R2, aes(x = Variable, y = Value, fill = Category, color = Category)) +
@@ -132,8 +161,8 @@ legend_name <- "Model"
       y = expression(R^2)
     ) +
     theme_classic() +
-    scale_fill_manual(name = legend_name, values = c("Age Error" = "skyblue", "No Age Error" = "orange")) +
-    scale_color_manual(name = legend_name, values = c("Age Error" = "deepskyblue", "No Age Error" = "darkorange")) +
+    scale_fill_manual(name = legend_name, values = c("Null" = "orange", "Age Error" = "skyblue", "Age Error v Null" = "springgreen3")) +
+    scale_color_manual(name = legend_name, values = c("Null" = "darkorange", "Age Error" = "deepskyblue", "Age Error v Null" = "springgreen4")) +
     scale_x_discrete(
       labels = c(
         "train_R2" = "Training", 
@@ -201,10 +230,12 @@ ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, heigh
   
   # Combine the true values and predictions into a long format dataframe
   comparison_long <- data.frame(
-    TrueAge = c(rep(all_model1_actual, 2), all_model2_actual),
+    TrueAge = c(all_model1_actual, all_model2_actual, all_model1_actual),
     PredictedAge = c(all_model1_pred, all_model2_pred, all_model2_pred),
-    Model = rep(c("Null", "Age Error v Null", "Age Error"), each = length(all_model1_actual)*nsim)
+    Model = rep(c("Null", "Age Error", "Age Error v Null"))
   )
+  
+  comparison_long$Model <- factor(comparison_long$Model, levels = c("Null", "Age Error", "Age Error v Null"))
   
   box_plot <- ggplot(comparison_long, aes(x = as.factor(TrueAge), y = PredictedAge, fill = Model)) +
     geom_boxplot(outlier.size = 1.75, size = 0.75) +
@@ -224,8 +255,8 @@ ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, heigh
       legend.title = element_text(size = 20, face = "bold"),
       legend.text = element_text(size = 16)
     )
-  
-  print(box_plot)
-
-  ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, height = 8, units = "in", dpi = 300)
 }
+
+print(box_plot)
+
+ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, height = 8, units = "in", dpi = 300)
