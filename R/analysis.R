@@ -7,7 +7,7 @@ setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 10L
+nsim = 200L
 
 #Ageing Error
 {
@@ -260,3 +260,58 @@ ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, heigh
 print(box_plot)
 
 ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, height = 8, units = "in", dpi = 300)
+
+
+#performance metrics
+{
+  #null
+  mean(metrics_known$train_R2)
+  se <- sd(metrics_known$train_R2) / sqrt(length(metrics_known$train_R2))
+  qt(0.975, df = length(metrics_known$train_R2) - 1) * se
+  
+  mean(metrics_known$train_RMSE)
+  se <- sd(metrics_known$train_RMSE) / sqrt(length(metrics_known$train_RMSE))
+  qt(0.975, df = length(metrics_known$train_RMSE) - 1) * se
+  
+  mean(metrics_known$test_R2)
+  se <- sd(metrics_known$test_R2) / sqrt(length(metrics_known$test_R2))
+  qt(0.975, df = length(metrics_known$test_R2) - 1) * se
+  
+  mean(metrics_known$test_RMSE)
+  se <- sd(metrics_known$test_RMSE) / sqrt(length(metrics_known$test_RMSE))
+  qt(0.975, df = length(metrics_known$test_RMSE) - 1) * se
+  
+  #age error
+  mean(metrics_err$train_R2)
+  se <- sd(metrics_err$train_R2) / sqrt(length(metrics_err$train_R2))
+  qt(0.975, df = length(metrics_err$train_R2) - 1) * se
+  
+  mean(metrics_err$train_RMSE)
+  se <- sd(metrics_err$train_RMSE) / sqrt(length(metrics_err$train_RMSE))
+  qt(0.975, df = length(metrics_err$train_RMSE) - 1) * se
+  
+  mean(metrics_err$test_R2)
+  se <- sd(metrics_err$test_R2) / sqrt(length(metrics_err$test_R2))
+  qt(0.975, df = length(metrics_err$test_R2) - 1) * se
+  
+  mean(metrics_err$test_RMSE)
+  se <- sd(metrics_err$test_RMSE) / sqrt(length(metrics_err$test_RMSE))
+  qt(0.975, df = length(metrics_err$test_RMSE) - 1) * se
+  
+  #age error v. null
+  mean(metrics_err$train_R2_known)
+  se <- sd(metrics_err$train_R2_known) / sqrt(length(metrics_err$train_R2_known))
+  qt(0.975, df = length(metrics_err$train_R2_known) - 1) * se
+  
+  mean(metrics_err$train_RMSE_known)
+  se <- sd(metrics_err$train_RMSE_known) / sqrt(length(metrics_err$train_RMSE_known))
+  qt(0.975, df = length(metrics_err$train_RMSE_known) - 1) * se
+  
+  mean(metrics_err$test_R2_known)
+  se <- sd(metrics_err$test_R2_known) / sqrt(length(metrics_err$test_R2_known))
+  qt(0.975, df = length(metrics_err$test_R2_known) - 1) * se
+  
+  mean(metrics_err$test_RMSE_known)
+  se <- sd(metrics_err$test_RMSE_known) / sqrt(length(metrics_err$test_RMSE_known))
+  qt(0.975, df = length(metrics_err$test_RMSE_known) - 1) * se
+}

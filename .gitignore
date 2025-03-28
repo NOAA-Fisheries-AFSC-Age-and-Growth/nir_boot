@@ -2,8 +2,10 @@ single_run
 sims_err
 sims_known
 test_sims
+docs
 /single_run
 /sims
 /data/spectra_sav_golay.csv
+/R/SD_at_age_NIR_figure.R
 .Rhistory
 Output
