@@ -11,13 +11,33 @@ nsim = 200L
 
 #Ageing Error
 {
-  metrics_err <- matrix(data = NA, nrow = nsim, ncol = 9)
+  metrics_err <- matrix(data = NA, nrow = nsim, ncol = 17)
   colnames(metrics_err) <- c("iteration", "train_R2_known", "train_RMSE_known",
                              "test_R2_known", "test_RMSE_known", "train_R2",
-                             "train_RMSE", "test_R2", "test_RMSE")
+                             "train_RMSE", "test_R2", "test_RMSE", "train_APE", 
+                             "train_CV", "test_APE", "test_CV", "train_APE_known", 
+                             "train_CV_known", "test_APE_known", "test_CV_known")
   
   for (j in 1:nsim) {
-    metrics_err[j,] <- as.matrix(read.csv(paste0("./sims_err/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
+    metrics_err[j,1:9] <- as.matrix(read.csv(paste0("./sims_err/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
+    
+    err_train <- read.csv(paste0("./sims_err/", j, "/Output/Data/train_predictions.csv"))
+    metrics_err[j,10] <- agePrecision(train~pred, data = err_train)$APE
+    metrics_err[j,11] <- agePrecision(train~pred, data = err_train)$ACV
+    
+    err_test <- read.csv(paste0("./sims_err/", j, "/Output/Data/test_predictions.csv"))
+    metrics_err[j,12] <- agePrecision(train~pred, data = err_test)$APE
+    metrics_err[j,13] <- agePrecision(train~pred, data = err_test)$ACV
+    
+    train <- read.csv(paste0("./sims_known/", j, "/Output/Data/train_predictions.csv"))[, 1] #null input
+    pred  <- read.csv(paste0("./sims_err/", j, "/Output/Data/train_predictions.csv"))[, 2] #ageing error output
+    metrics_err[j,14] <- agePrecision(train~pred)$APE
+    metrics_err[j,15] <- agePrecision(train~pred)$ACV
+    
+    train <- read.csv(paste0("./sims_known/", j, "/Output/Data/test_predictions.csv"))[, 1] #null input
+    pred  <- read.csv(paste0("./sims_err/", j, "/Output/Data/test_predictions.csv"))[, 2] #ageing error output
+    metrics_err[j,16] <- agePrecision(train~pred)$APE
+    metrics_err[j,17] <- agePrecision(train~pred)$ACV
   }
   
   data_wide_R2_err <- as.data.frame(metrics_err[,c(1,6,8)])
@@ -39,11 +59,21 @@ nsim = 200L
 
 #known Age
 {
-  metrics_known <- matrix(data = NA, nrow = nsim, ncol = 5)
-  colnames(metrics_known) <- c("iteration","train_R2", "train_RMSE", "test_R2", "test_RMSE")
+  metrics_known <- matrix(data = NA, nrow = nsim, ncol = 9)
+  colnames(metrics_known) <- c("iteration","train_R2", "train_RMSE", "test_R2", 
+                               "test_RMSE", "train_APE", 
+                               "train_CV", "test_APE", "test_CV")
   
   for (j in 1:nsim) {
-    metrics_known[j,] <- as.matrix(read.csv(paste0("./sims_known/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
+    metrics_known[j,1:5] <- as.matrix(read.csv(paste0("./sims_known/",j,"/Output/Data/metrics",j,".csv"), header = TRUE)[1,])
+    
+    known_train <- read.csv(paste0("./sims_known/", j, "/Output/Data/train_predictions.csv"))
+    metrics_known[j,6] <- agePrecision(train~pred, data = known_train)$APE
+    metrics_known[j,7] <- agePrecision(train~pred, data = known_train)$ACV
+    
+    known_test <- read.csv(paste0("./sims_known/", j, "/Output/Data/test_predictions.csv"))
+    metrics_known[j,8] <- agePrecision(train~pred, data = known_test)$APE
+    metrics_known[j,9] <- agePrecision(train~pred, data = known_test)$ACV
   }
   
   data_wide_R2_known <- as.data.frame(metrics_known[,c(1,2,4)])
@@ -281,6 +311,22 @@ ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width =
   se <- sd(metrics_known$test_RMSE) / sqrt(length(metrics_known$test_RMSE))
   qt(0.975, df = length(metrics_known$test_RMSE) - 1) * se
   
+  mean(metrics_known$train_APE)
+  se <- sd(metrics_known$train_APE) / sqrt(length(metrics_known$train_APE))
+  qt(0.975, df = length(metrics_known$train_APE) - 1) * se
+  
+  mean(metrics_known$train_CV)
+  se <- sd(metrics_known$train_CV) / sqrt(length(metrics_known$train_CV))
+  qt(0.975, df = length(metrics_known$train_CV) - 1) * se
+  
+  mean(metrics_known$test_APE)
+  se <- sd(metrics_known$test_APE) / sqrt(length(metrics_known$test_APE))
+  qt(0.975, df = length(metrics_known$test_APE) - 1) * se
+  
+  mean(metrics_known$test_CV)
+  se <- sd(metrics_known$test_CV) / sqrt(length(metrics_known$test_CV))
+  qt(0.975, df = length(metrics_known$test_CV) - 1) * se
+  
   #age error
   mean(metrics_err$train_R2)
   se <- sd(metrics_err$train_R2) / sqrt(length(metrics_err$train_R2))
@@ -298,6 +344,22 @@ ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width =
   se <- sd(metrics_err$test_RMSE) / sqrt(length(metrics_err$test_RMSE))
   qt(0.975, df = length(metrics_err$test_RMSE) - 1) * se
   
+  mean(metrics_err$train_APE)
+  se <- sd(metrics_known$train_APE) / sqrt(length(metrics_known$train_APE))
+  qt(0.975, df = length(metrics_known$train_APE) - 1) * se
+  
+  mean(metrics_err$train_CV)
+  se <- sd(metrics_known$train_CV) / sqrt(length(metrics_known$train_CV))
+  qt(0.975, df = length(metrics_known$train_CV) - 1) * se
+  
+  mean(metrics_err$test_APE)
+  se <- sd(metrics_known$test_APE) / sqrt(length(metrics_known$test_APE))
+  qt(0.975, df = length(metrics_known$test_APE) - 1) * se
+  
+  mean(metrics_err$test_CV)
+  se <- sd(metrics_known$test_CV) / sqrt(length(metrics_known$test_CV))
+  qt(0.975, df = length(metrics_known$test_CV) - 1) * se
+  
   #age error v. null
   mean(metrics_err$train_R2_known)
   se <- sd(metrics_err$train_R2_known) / sqrt(length(metrics_err$train_R2_known))
@@ -314,4 +376,20 @@ ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width =
   mean(metrics_err$test_RMSE_known)
   se <- sd(metrics_err$test_RMSE_known) / sqrt(length(metrics_err$test_RMSE_known))
   qt(0.975, df = length(metrics_err$test_RMSE_known) - 1) * se
+  
+  mean(metrics_err$train_APE_known)
+  se <- sd(metrics_err$train_APE_known) / sqrt(length(metrics_err$train_APE_known))
+  qt(0.975, df = length(metrics_err$train_APE_known) - 1) * se
+  
+  mean(metrics_err$train_CV_known)
+  se <- sd(metrics_err$train_CV_known) / sqrt(length(metrics_err$train_CV_known))
+  qt(0.975, df = length(metrics_err$train_CV_known) - 1) * se
+  
+  mean(metrics_err$test_APE_known)
+  se <- sd(metrics_err$test_APE_known) / sqrt(length(metrics_err$test_APE_known))
+  qt(0.975, df = length(metrics_err$test_APE_known) - 1) * se
+  
+  mean(metrics_err$test_CV_known)
+  se <- sd(metrics_err$test_CV_known) / sqrt(length(metrics_err$test_CV_known))
+  qt(0.975, df = length(metrics_err$test_CV_known) - 1) * se
 }
