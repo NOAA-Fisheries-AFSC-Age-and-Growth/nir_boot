@@ -143,6 +143,7 @@ legend_name <- "Model"
         "test_RMSE" = "Test"
       )
     ) +
+    ylim(0, 1.5) + 
     theme(
       axis.title.x = element_text(size = 20, face = "bold"),
       axis.title.y = element_text(size = 20, face = "bold"),
@@ -199,6 +200,7 @@ legend_name <- "Model"
         "test_R2" = "Test"
       )
     ) +
+    ylim(0, 1) + 
     theme(
       axis.title.x = element_text(size = 20, face = "bold"),
       axis.title.y = element_text(size = 20, face = "bold"),

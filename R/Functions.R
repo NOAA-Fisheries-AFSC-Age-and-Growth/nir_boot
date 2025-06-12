@@ -2,9 +2,40 @@ samp_age <- function(input_age, nreaders, bias_mat, sd_mat){
   reader_id <- sample.int(nreaders,length(input_age), replace = TRUE)#apply a random reader to each age estimate
   output_age <- vector(length = length(input_age))
   
-  for (i in 1:length(input_age)) {
-    output_age[i] <- round(abs(rnorm(1, mean = bias_mat[input_age[i]+1,reader_id[i]], sd = sd_mat[input_age[i]+1,reader_id[i]])))
+  #for (i in 1:length(input_age)) {
+  #  output_age[i] <- round(abs(rnorm(1, mean = bias_mat[input_age[i]+1,reader_id[i]], sd = sd_mat[input_age[i]+1,reader_id[i]])))
+  #}
+  
+  #AE_mat is list of ageing error matrices for each reader
+  AE_mat <- vector("list", nreaders)
+  for (i in 1:nreaders) {
+    AE_mat[[i]] <- diag(nrow(bias_mat))
   }
+  
+  ages<-(1:nrow(AE_mat[[1]]))-1
+  
+  for (k in 1:nreaders) {
+    for (i in 1:nrow(AE_mat[[1]])) {
+      for(j in 1:nrow(AE_mat[[1]])){
+        if(j==1){
+          AE_mat[[k]][i,j]<-pnorm(ages[j]+0.5, mean = bias_mat[i,k], sd = sd_mat[i,k])
+        }else if (j %in% 2:(nrow(AE_mat[[1]])-1)){
+          AE_mat[[k]][i,j]<-pnorm(ages[j]+0.5, mean = bias_mat[i,k], sd = sd_mat[i,k])-pnorm(ages[j]-0.5, mean = bias_mat[i,k], sd = sd_mat[i,k])
+        }else if (j==nrow(AE_mat[[1]])){
+          AE_mat[[k]][i,j]<-1-pnorm(ages[j]-0.5, mean = bias_mat[i,k], sd = sd_mat[i,k])
+        }
+      }
+    }
+  }
+  
+  #sample age w/ ageing error from each readers age error mat w/ multinomial dist
+  output_age <- vector(length = length(input_age))
+  for (i in 1:length(input_age)){
+    #the +1 accounts for the fact that AE_mat starts at age-0, the definition for age 0 is in row 1
+    #the -1 accounts for the random samples of rmultinom also include age-0 and age-0 is in cell 1
+    output_age[i] <- (which(rmultinom(1, size = 1, prob = AE_mat[[reader_id[i]]][input_age[i]+1,]) == 1)-1)
+  }
+  
   return(output_age)
 }
 

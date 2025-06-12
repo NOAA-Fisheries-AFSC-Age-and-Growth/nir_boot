@@ -7,7 +7,7 @@ setwd(wd)
 
 source(paste0(wd,"/R/Functions.R"))
 
-nsim <-1L:1L
+nsim <-1L:200L
 
 age_files(nsim, wd)
 
