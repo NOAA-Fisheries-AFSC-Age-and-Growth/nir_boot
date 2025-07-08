@@ -1,6 +1,10 @@
+library(FSA)
 library(ggplot2)
 library(tidyr)
 library(cowplot)
+library(dplyr)
+library(knitr)
+
 
 wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
@@ -235,7 +239,8 @@ combined_plot <- ggdraw() +
 
 print(combined_plot)
 
-ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, 
+       height = 8, units = "in", dpi = 300, bg = "white")
 
 
 #boxplot figure
@@ -291,107 +296,75 @@ ggsave(filename = './Output/Violin.png', plot = combined_plot, width = 12, heigh
 
 print(box_plot)
 
-ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave(filename = './Output/Boxplot_all_scenarios.png', plot = box_plot, width = 12, 
+       height = 8, units = "in", dpi = 300, bg = "white")
 
 
 #performance metrics
 {
-  #null
-  mean(metrics_known$train_R2)
-  se <- sd(metrics_known$train_R2) / sqrt(length(metrics_known$train_R2))
-  qt(0.975, df = length(metrics_known$train_R2) - 1) * se
+  calculate_stats <- function(data_vector) {
+    n <- length(data_vector)
+    mean_val <- mean(data_vector, na.rm = TRUE)
+    se <- sd(data_vector, na.rm = TRUE) / sqrt(n)
+    
+    if (n > 1) {
+      ci_margin <- qt(0.975, df = n - 1) * se
+      lower_ci <- mean_val - ci_margin
+      upper_ci <- mean_val + ci_margin
+      ci_string <- sprintf("%.4f \u00B1 %.4f", mean_val, ci_margin)
+    } else {
+      ci_string <- sprintf("%.4f \u00B1 NA", mean_val)
+    }
+    
+    return(list(Mean = mean_val, CI_String = ci_string))
+  }
   
-  mean(metrics_known$train_RMSE)
-  se <- sd(metrics_known$train_RMSE) / sqrt(length(metrics_known$train_RMSE))
-  qt(0.975, df = length(metrics_known$train_RMSE) - 1) * se
+  #Null Model
+  cat("### Metrics for 'metrics_known' (Null Model)\n")
   
-  mean(metrics_known$test_R2)
-  se <- sd(metrics_known$test_R2) / sqrt(length(metrics_known$test_R2))
-  qt(0.975, df = length(metrics_known$test_R2) - 1) * se
+  metrics_known_cols <- c("train_R2", "train_RMSE", "test_R2", "test_RMSE",
+                          "train_APE", "train_CV", "test_APE", "test_CV")
   
-  mean(metrics_known$test_RMSE)
-  se <- sd(metrics_known$test_RMSE) / sqrt(length(metrics_known$test_RMSE))
-  qt(0.975, df = length(metrics_known$test_RMSE) - 1) * se
+  results_known <- data.frame(Metric = character(), `Mean (95% CI)` = character(), stringsAsFactors = FALSE)
   
-  mean(metrics_known$train_APE)
-  se <- sd(metrics_known$train_APE) / sqrt(length(metrics_known$train_APE))
-  qt(0.975, df = length(metrics_known$train_APE) - 1) * se
+  for (col in metrics_known_cols) {
+    stats <- calculate_stats(metrics_known[[col]])
+    results_known <- rbind(results_known, data.frame(Metric = col, `Mean (95% CI)` = stats$CI_String))
+  }
   
-  mean(metrics_known$train_CV)
-  se <- sd(metrics_known$train_CV) / sqrt(length(metrics_known$train_CV))
-  qt(0.975, df = length(metrics_known$train_CV) - 1) * se
+  print(kable(results_known, format = "markdown", align = c('l', 'c')))
+  cat("\n\n")
   
-  mean(metrics_known$test_APE)
-  se <- sd(metrics_known$test_APE) / sqrt(length(metrics_known$test_APE))
-  qt(0.975, df = length(metrics_known$test_APE) - 1) * se
   
-  mean(metrics_known$test_CV)
-  se <- sd(metrics_known$test_CV) / sqrt(length(metrics_known$test_CV))
-  qt(0.975, df = length(metrics_known$test_CV) - 1) * se
+  #Age Error Model
+  cat("### Metrics for 'metrics_err' (Age Error Model)\n")
   
-  #age error
-  mean(metrics_err$train_R2)
-  se <- sd(metrics_err$train_R2) / sqrt(length(metrics_err$train_R2))
-  qt(0.975, df = length(metrics_err$train_R2) - 1) * se
+  metrics_err_cols <- c("train_R2", "train_RMSE", "test_R2", "test_RMSE",
+                        "train_APE", "train_CV", "test_APE", "test_CV")
   
-  mean(metrics_err$train_RMSE)
-  se <- sd(metrics_err$train_RMSE) / sqrt(length(metrics_err$train_RMSE))
-  qt(0.975, df = length(metrics_err$train_RMSE) - 1) * se
+  results_err <- data.frame(Metric = character(), `Mean (95% CI)` = character(), stringsAsFactors = FALSE)
   
-  mean(metrics_err$test_R2)
-  se <- sd(metrics_err$test_R2) / sqrt(length(metrics_err$test_R2))
-  qt(0.975, df = length(metrics_err$test_R2) - 1) * se
+  for (col in metrics_err_cols) {
+    stats <- calculate_stats(metrics_err[[col]])
+    results_err <- rbind(results_err, data.frame(Metric = col, `Mean (95% CI)` = stats$CI_String))
+  }
   
-  mean(metrics_err$test_RMSE)
-  se <- sd(metrics_err$test_RMSE) / sqrt(length(metrics_err$test_RMSE))
-  qt(0.975, df = length(metrics_err$test_RMSE) - 1) * se
+  print(kable(results_err, format = "markdown", align = c('l', 'c')))
+  cat("\n\n")
   
-  mean(metrics_err$train_APE)
-  se <- sd(metrics_known$train_APE) / sqrt(length(metrics_known$train_APE))
-  qt(0.975, df = length(metrics_known$train_APE) - 1) * se
   
-  mean(metrics_err$train_CV)
-  se <- sd(metrics_known$train_CV) / sqrt(length(metrics_known$train_CV))
-  qt(0.975, df = length(metrics_known$train_CV) - 1) * se
+  #Age Error vs. Null Model
+  cat("### Metrics for 'metrics_err' (Age Error vs. Null Model Comparison)\n")
   
-  mean(metrics_err$test_APE)
-  se <- sd(metrics_known$test_APE) / sqrt(length(metrics_known$test_APE))
-  qt(0.975, df = length(metrics_known$test_APE) - 1) * se
+  metrics_err_known_cols <- c("train_R2_known", "train_RMSE_known", "test_R2_known", "test_RMSE_known",
+                              "train_APE_known", "train_CV_known", "test_APE_known", "test_CV_known")
   
-  mean(metrics_err$test_CV)
-  se <- sd(metrics_known$test_CV) / sqrt(length(metrics_known$test_CV))
-  qt(0.975, df = length(metrics_known$test_CV) - 1) * se
+  results_err_known <- data.frame(Metric = character(), `Mean (95% CI)` = character(), stringsAsFactors = FALSE)
   
-  #age error v. null
-  mean(metrics_err$train_R2_known)
-  se <- sd(metrics_err$train_R2_known) / sqrt(length(metrics_err$train_R2_known))
-  qt(0.975, df = length(metrics_err$train_R2_known) - 1) * se
+  for (col in metrics_err_known_cols) {
+    stats <- calculate_stats(metrics_err[[col]])
+    results_err_known <- rbind(results_err_known, data.frame(Metric = col, `Mean (95% CI)` = stats$CI_String))
+  }
   
-  mean(metrics_err$train_RMSE_known)
-  se <- sd(metrics_err$train_RMSE_known) / sqrt(length(metrics_err$train_RMSE_known))
-  qt(0.975, df = length(metrics_err$train_RMSE_known) - 1) * se
-  
-  mean(metrics_err$test_R2_known)
-  se <- sd(metrics_err$test_R2_known) / sqrt(length(metrics_err$test_R2_known))
-  qt(0.975, df = length(metrics_err$test_R2_known) - 1) * se
-  
-  mean(metrics_err$test_RMSE_known)
-  se <- sd(metrics_err$test_RMSE_known) / sqrt(length(metrics_err$test_RMSE_known))
-  qt(0.975, df = length(metrics_err$test_RMSE_known) - 1) * se
-  
-  mean(metrics_err$train_APE_known)
-  se <- sd(metrics_err$train_APE_known) / sqrt(length(metrics_err$train_APE_known))
-  qt(0.975, df = length(metrics_err$train_APE_known) - 1) * se
-  
-  mean(metrics_err$train_CV_known)
-  se <- sd(metrics_err$train_CV_known) / sqrt(length(metrics_err$train_CV_known))
-  qt(0.975, df = length(metrics_err$train_CV_known) - 1) * se
-  
-  mean(metrics_err$test_APE_known)
-  se <- sd(metrics_err$test_APE_known) / sqrt(length(metrics_err$test_APE_known))
-  qt(0.975, df = length(metrics_err$test_APE_known) - 1) * se
-  
-  mean(metrics_err$test_CV_known)
-  se <- sd(metrics_err$test_CV_known) / sqrt(length(metrics_err$test_CV_known))
-  qt(0.975, df = length(metrics_err$test_CV_known) - 1) * se
+  print(kable(results_err_known, format = "markdown", align = c('l', 'c')))
 }
