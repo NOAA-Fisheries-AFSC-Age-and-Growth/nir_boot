@@ -6,12 +6,17 @@ library(dplyr)
 library(knitr)
 
 
-wd <- "C:/Users/Derek.Chamberlin/Work/Research/TMA_FT_NIR_Uncertainty/nir_boot"
+wd <- "G:/My Drive/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
-nsim = 200L
+sim_dirs <- list.dirs("./sims_err", recursive = FALSE)
+nsim <- length(sim_dirs)
+
+if (nsim == 0) {
+  stop("No simulation folders found in ./sims_err. Check your directory.")
+}
 
 #Ageing Error
 {

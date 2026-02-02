@@ -1,3 +1,26 @@
+apply_sg <- function(wd, df_path, apply_sg, start_col){
+  library(signal)
+  
+  setwd(wd)
+  
+  df <- read.csv(paste0(df_path))
+  df <- subset(df, !is.na(final_age))
+  
+  if (apply_sg) {
+    message("Applying Savitzky-Golay filter...")
+    spectra <- df[, start_col:ncol(df)]
+    for (i in 1:nrow(spectra)) {
+      spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
+    }
+    write.csv(spectra, "./data/spectra.csv", row.names=FALSE)
+    message("Sav-Golay Complete")
+  } else {
+    message("Skipping Savitzky-Golay filter (using raw spectra).")
+    spectra <- df[, start_col:ncol(df)]
+    write.csv(spectra, "./data/spectra.csv", row.names=FALSE)
+  }
+}
+
 samp_age <- function(input_age, nreaders, bias_mat, sd_mat){
   reader_id <- sample.int(nreaders,length(input_age), replace = TRUE)#apply a random reader to each age estimate
   output_age <- vector(length = length(input_age))
@@ -49,61 +72,50 @@ boot_age <- function(n_boot, input_age, bias_mat, sd_mat){
   return(new_ages)
 }
 
-age_files <- function(nsim, wd){
+age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, meta_cols){
   #This script bootstraps the age data iterations
-  
-  library(signal)
-  
   setwd(wd)
   
-  #import TMA age error data, bias columns are (expected age-0.5)
-  {
-    TMA_bias <- matrix(ncol=7, nrow = 24)
-    TMA_bias[,1] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,2] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,3] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,4] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,5] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,6] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[5,-1])-0.5)
-    TMA_bias[,7] <- (as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[5,-1])-0.5)
-    colnames(TMA_bias) <- c("bias_R1", "bias_R2", "bias_R3", "bias_R4", "bias_R5", "bias_R6", "bias_R7")
+  reader_files <- list.files(reader_dir, pattern = "\\.csv$", full.names = TRUE)
+  
+  if (length(reader_files) == 0) {
+    stop(paste("No CSV files found in directory:", reader_dir))
   }
   
+  n_readers <- length(reader_files)
+  message(paste("Found", n_readers, "reader files in directory. Processing..."))
   
-  {
-    TMA_sd <- matrix(ncol=7, nrow = 24)
-    TMA_sd[,1] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader1.csv", header=TRUE)[4,-1])
-    TMA_sd[,2] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader2.csv", header=TRUE)[4,-1])
-    TMA_sd[,3] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader3.csv", header=TRUE)[4,-1])
-    TMA_sd[,4] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader4.csv", header=TRUE)[4,-1])
-    TMA_sd[,5] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader5.csv", header=TRUE)[4,-1])
-    TMA_sd[,6] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader6.csv", header=TRUE)[4,-1])
-    TMA_sd[,7] <- as.numeric(read.csv("./data/7_readers_complete_dataset_TMB_Age_23/Results/Pollock SS3_format_Reader7.csv", header=TRUE)[4,-1])
-    colnames(TMA_sd) <- c("SD_R1", "SD_R2", "SD_R3", "SD_R4", "SD_R5", "SD_R6", "SD_R7")
+  #Empty matrics for bias and SD
+  TMA_bias <- NULL
+  TMA_sd <- NULL
+  
+  for (i in 1:n_readers) {
+    current_file_data <- read.csv(reader_files[i], header = TRUE)
+    
+    #import TMA age error data, bias columns are (expected age-0.5)
+    current_bias <- as.numeric(current_file_data[5, -1]) - 0.5
+    
+    current_sd <- as.numeric(current_file_data[4, -1])
+    
+    TMA_bias <- cbind(TMA_bias, current_bias)
+    TMA_sd <- cbind(TMA_sd, current_sd)
   }
   
-  df <- read.csv(paste0("./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"))
-  df <- subset(df, !is.na(final_age))
+  colnames(TMA_bias) <- paste0("bias_R", 1:n_readers)
+  colnames(TMA_sd) <- paste0("SD_R", 1:n_readers)
+  
+  df <- read.csv(paste0(df_path))
+  df <- subset(df, !is.na(df[,age_col]))
   df2 <- df
-  
-  # Apply Savitzky-Golay filter with specified parameters
-  spectra <- df[, 8:ncol(df)]
-  for (i in 1:nrow(spectra)) {
-    spectra[i,] <- sgolayfilt(as.matrix(spectra[i,]), p = 2, n = 17, m = 1)
-  }
-  
-  write.csv(spectra, "./data/spectra_sav_golay.csv", row.names=FALSE)
-  
-  message("Sav-Golay Complete")
   
   #create an 80:20 training:test split
   split_ratio <- c("training" = 0.8, "test" = 0.2)
-  num_training <- floor(length(df[, 2]) * split_ratio["training"])
-  num_test <- length(df[, 2]) - num_training
+  num_training <- floor(length(df[, train_test_col]) * split_ratio["training"])
+  num_test <- length(df[, train_test_col]) - num_training
   values <- c(rep("training", num_training), rep("test", num_test))
   
   #bootstrap the age data
-  input_age <- as.numeric(df$final_age)
+  input_age <- as.numeric(df[,age_col])
   set.seed(581)
   new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) 
   
@@ -113,15 +125,13 @@ age_files <- function(nsim, wd){
   #create a folder to store all the sims
   dir.create("./sims_err", showWarnings = FALSE) 
   
-  df <- df[,1:7]
+  df <- df[,meta_cols]
   
   set.seed(581)
   for (i in nsim) {
     dir.create(paste0("./sims_err/",i),showWarnings = FALSE)
-    df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
-    df[,3] <- new_ages[,i] #replace original age estimates with bootstrap ages
-    #df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
-    #df[, 3][df[, 3] == 0] <- 1 #change age 0 to age 1, only test purposes
+    df[,train_test_col] <- sample(values, size = length(df[,train_test_col]), replace = FALSE) #randomly assign test/train
+    df[,age_col] <- new_ages[,i] #replace original age estimates with bootstrap ages
     write.csv(df, paste0("./sims_err/",i,"/input.csv"), row.names=FALSE)
   }
   
@@ -131,13 +141,12 @@ age_files <- function(nsim, wd){
   #create a folder to store all the sims
   dir.create("./sims_known", showWarnings = FALSE) 
   
-  df <- df2[,1:7]
+  df <- df2[,meta_cols]
   
   set.seed(581)
   for (i in nsim) {
     dir.create(paste0("./sims_known/",i),showWarnings = FALSE)
-    df[,2] <- sample(values, size = length(df[, 2]), replace = FALSE) #randomly assign test/train
-    #df[,8:ncol(df)] <- spectra #replace spectra with transformed spectra
+    df[,train_test_col] <- sample(values, size = length(df[,train_test_col]), replace = FALSE) #randomly assign test/train
     write.csv(df, paste0("./sims_known/",i,"/input.csv"), row.names=FALSE)
   }
   

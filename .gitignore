@@ -5,8 +5,11 @@ test_sims
 docs
 /single_run
 /sims
-/data/spectra_sav_golay.csv
+/data/spectra.csv
 /R/SD_at_age_NIR_figure.R
 .Rhistory
 Output
 Normal_Dist
+Output_multi
+sims_err_multi
+sims_known_multi
