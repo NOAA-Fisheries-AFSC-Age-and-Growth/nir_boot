@@ -20,13 +20,6 @@ To run this analysis, ensure your directory is organized as follows:
 │   ├── data.csv  				  # Main dataset
 │   └── Age_Error_Definitions/    # Folder containing reader precision CSVs
 │       └── Results/              # Directory scanned for reader bias/SD files
-├── sims_err/                     # (User input folder)
-│   ├── 1  				  		  # Main dataset
-│   └── 2    					  # Folder containing reader precision CSVs
-│       └── Output/              # Directory scanned for reader bias/SD files
-│       	└── Data/              # Directory scanned for reader bias/SD files
-│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
-│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
 └── README.md
 
 ```
@@ -146,7 +139,7 @@ wd <- args[2]
 
 ### 2. Required Outputs
 
-For **each iteration `j**`, your script must generate the following files inside the specific simulation folder (e.g., `./sims_err/1/`):
+For **each iteration `j`**, your script must generate the following files inside the specific simulation folder (e.g., `./sims_err/1/`):
 **A. Predictions (CSV)**
 
 * **Path:** `./Output/Data/train_predictions.csv`
@@ -174,7 +167,7 @@ train,pred
 
 
 
-**C. Directory Structure**
+**C. Model Output Directory Structure**
 Your script is responsible for creating these subdirectories if they do not exist:
 
 ```text
@@ -185,21 +178,22 @@ Your script is responsible for creating these subdirectories if they do not exis
 
 ```markdown
 .
-├── sims_err/                     # (User input folder)
-│   ├── 1  				  		  # Main dataset
-│   └── 2    					  # Folder containing reader precision CSVs
-│       └── Output/              # Directory scanned for reader bias/SD files
-│       	└── Data/              # Directory scanned for reader bias/SD files
-│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
-│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
-├── sims_known/                     # (User input folder)
-│   ├── 1  				  		  # Main dataset
-│   └── 2    					  # Folder containing reader precision CSVs
-│       └── Output/              # Directory scanned for reader bias/SD files
-│       	└── Data/              # Directory scanned for reader bias/SD files
-│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
-│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
-└── README.md
+├── sims_err/                     						# Directory containing all ageing error iterations
+│   ├── 1  				  		  						# Iteration 1
+│   └── 2    					  						# Iteration 2
+│       └── Output/              						# Directory for output from individual iteration
+│       	├── Data/              						# Directory for data output from individual iteration
+│       	│	└── test_predictions.csv/              	# CSV containing test data input ages and predictions
+│       	│	└── train_predictions.csv/              # CSV containing train data input ages and predictions
+│       	└── Figures/              					# Directory for figures output from individual iteration
+└── sims_known/                     					# Directory containing all known age iterations
+    ├── 1  				  		  						# Iteration 1
+    └── 2    					  						# Iteration 2
+        └── Output/              						# Directory for output from individual iteration
+        	├── Data/              						# Directory for data output from individual iteration
+        	│	└── test_predictions.csv/              	# CSV containing test data input ages and predictions
+        	│	└── train_predictions.csv/              # CSV containing train data input ages and predictions
+        	└── Figures/              					# Directory for figures output from individual iteration
 
 ```
 
