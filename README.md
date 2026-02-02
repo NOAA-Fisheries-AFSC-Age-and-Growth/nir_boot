@@ -20,6 +20,13 @@ To run this analysis, ensure your directory is organized as follows:
 │   ├── data.csv  				  # Main dataset
 │   └── Age_Error_Definitions/    # Folder containing reader precision CSVs
 │       └── Results/              # Directory scanned for reader bias/SD files
+├── sims_err/                     # (User input folder)
+│   ├── 1  				  		  # Main dataset
+│   └── 2    					  # Folder containing reader precision CSVs
+│       └── Output/              # Directory scanned for reader bias/SD files
+│       	└── Data/              # Directory scanned for reader bias/SD files
+│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
+│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
 └── README.md
 
 ```
@@ -92,35 +99,119 @@ Once the simulations are complete, use `analysis.R` to aggregate the metrics and
 * **`Boxplot_all_scenarios.png`**: Visual comparison of predicted vs. reference age distributions.
 * **Markdown Tables**: The script prints summary tables (Mean ± 95% CI) to the console for easy copying into manuscripts.
 
+---
+
 ## Input Data Format Requirements
 
 To use this code with your own data, ensure your inputs match the expected format:
 
 1. **Main Data CSV (`df_path`)**:
 * Must contain columns for `file_name`, `sample` (train/test labels), and `final_age`.
-* Input features (e.g.- spectral data) must be in contiguous columns (default start column is 8).
-* *Note: If your column indices differ, update the `age_col`, `train_test_col`, and `meta_cols` arguments in `executable.R`.*
+* **Input Features**: The code assumes features (spectra, pixel values, etc.) start at a specific column (default is column 8).
+* *Note: If your features start at a different column, update the `age_col`, `train_test_col`, and `meta_cols` arguments in `executable.R`.*
 
 
 2. **Reader Precision Files (`reader_dir`)**:
 * The code scans this folder for **all** `.csv` files.
-* Each file must follow the specific default matrix format output from the `AgeingError` v2.1.0 R package:
-* **Row 4**: Standard Deviation (SD) values.
-* **Row 5**: Bias values.
+* Each file must follow the specific matrix format:
+* **Row 4**: Standard Deviation (SD) values for each age class.
+* **Row 5**: Bias values for each age class.
 
 
 * *Ensure this folder contains ONLY reader files to avoid errors.*
 
+---
+
+## Using Custom Models (Replacing MMCNN)
+
+You can replace the default FT-NIRS Convolutional Neural Network with **any** regression model (e.g., Random Forest, Gradient Boosting, Linear Regression) by modifying the `system()` calls in `executable.R`.
+
+To ensure your custom model works with `analysis.R`, your script must follow these input/output specifications:
+
+### 1. Input Arguments
+
+Your script must accept two command-line arguments:
+
+1. **Iteration Number (`j`)**: The current simulation index (e.g., `1`, `2`, ...).
+2. **Working Directory (`wd`)**: The root path of the project.
+
+*Example R implementation:*
+
+```r
+args <- commandArgs(trailingOnly = TRUE)
+j <- as.numeric(args[1])
+wd <- args[2]
+
+```
+
+### 2. Required Outputs
+
+For **each iteration `j**`, your script must generate the following files inside the specific simulation folder (e.g., `./sims_err/1/`):
+**A. Predictions (CSV)**
+
+* **Path:** `./Output/Data/train_predictions.csv`
+* **Path:** `./Output/Data/test_predictions.csv`
+* **Format:** Must contain at least two columns named `train` (Actual Age) and `pred` (Predicted Age).
+```csv
+train,pred
+5,5.2
+3,2.9
+...
+
+```
 
 
-## Customization
 
-* **Filter Settings:** To turn off the Savitzky-Golay filter, change `apply_sg = FALSE` in `executable.R`.
-* **Metadata Columns:** If your dataset has more or fewer metadata columns before the input features (e.g.- spectral data), adjust `meta_cols = 1:X` in `executable.R`
+**B. Metrics (CSV)**
+
+* **Path:** `./Output/Data/metrics{j}.csv` (e.g., `metrics1.csv`)
+* **Format:** A single-row CSV with the following columns (headers must match exactly):
+* `iteration`: The value of `j`.
+* `train_R2`: R-squared for training set.
+* `train_RMSE`: RMSE for training set.
+* `test_R2`: R-squared for test set.
+* `test_RMSE`: RMSE for test set.
+
+
+
+**C. Directory Structure**
+Your script is responsible for creating these subdirectories if they do not exist:
+
+```text
+./sims_err/{j}/Output/Data/
+./sims_err/{j}/Output/Figures/  (Optional, but recommended for plots)
+
+```
+
+```markdown
+.
+├── sims_err/                     # (User input folder)
+│   ├── 1  				  		  # Main dataset
+│   └── 2    					  # Folder containing reader precision CSVs
+│       └── Output/              # Directory scanned for reader bias/SD files
+│       	└── Data/              # Directory scanned for reader bias/SD files
+│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
+│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
+├── sims_known/                     # (User input folder)
+│   ├── 1  				  		  # Main dataset
+│   └── 2    					  # Folder containing reader precision CSVs
+│       └── Output/              # Directory scanned for reader bias/SD files
+│       	└── Data/              # Directory scanned for reader bias/SD files
+│       		└── test_predictions.csv/              # Directory scanned for reader bias/SD files
+│       		└── train_predictions.csv/              # Directory scanned for reader bias/SD files
+└── README.md
+
+```
+
 
 ## Citation
 
 If you use this code, please cite the associated manuscript:
 
-* *Chamberlin, D. W., Helser, T. E., Brogan, J. D., Benson, I. M., Conner, J., Chin, A. T., Gburski, C. M., Matta, M. E., Pearce, J. A., Stone, K. R., TenBrink, T. T., & Arrington, M. B. (In review). A framework to investigate the effects of observation error on neural network predictions of fish age. Fish and Fisheries.*
-* Original MMCNN model adapted from Benson et al. (2023).
+> Chamberlin, D. W., Helser, T. E., Brogan, J. D., Benson, I. M., Conner, J., Chin, A. T., Gburski, C. M., Matta, M. E., Pearce, J. A., Stone, K. R., TenBrink, T. T., & Arrington, M. B. (In review). A framework to investigate the effects of observation error on neural network predictions of fish age. *Fish and Fisheries*.
+
+Original MMCNN model adapted from Benson et al. (2023).
+
+```
+
+```
