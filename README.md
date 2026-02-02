@@ -140,6 +140,7 @@ wd <- args[2]
 ### 2. Required Outputs
 
 For **each iteration `j`**, your script must generate the following files inside the specific simulation folder (e.g., `./sims_err/1/`):
+
 **A. Predictions (CSV)**
 
 * **Path:** `./Output/Data/train_predictions.csv`
@@ -205,7 +206,3 @@ If you use this code, please cite the associated manuscript:
 > Chamberlin, D. W., Helser, T. E., Brogan, J. D., Benson, I. M., Conner, J., Chin, A. T., Gburski, C. M., Matta, M. E., Pearce, J. A., Stone, K. R., TenBrink, T. T., & Arrington, M. B. (In review). A framework to investigate the effects of observation error on neural network predictions of fish age. *Fish and Fisheries*.
 
 Original MMCNN model adapted from Benson et al. (2023).
-
-```
-
-```
