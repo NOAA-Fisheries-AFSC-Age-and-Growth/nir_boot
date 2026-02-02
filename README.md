@@ -1,4 +1,3 @@
-```markdown
 # A framework to investigate the effects of observation error on neural network predictions of fish age
 
 This repository contains the R scripts and data processing pipeline used to analyze the effects of ageing error on neural network model predictions of fish age. The analysis implements a Multi-Modal Convolutional Neural Network (MMCNN) and incorporates traditional ageing error through a bootstrapping simulation approach.
@@ -9,7 +8,7 @@ The code allows users to quantify how reader uncertainty (bias and precision) pr
 
 To run this analysis, ensure your directory is organized as follows:
 
-```text
+```markdown
 .
 ├── R/
 │   ├── executable.R              # MASTER SCRIPT: Prepares data and runs simulations
