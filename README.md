@@ -117,7 +117,7 @@ To use this code with your own data, ensure your inputs match the expected forma
 ## Customization
 
 * **Filter Settings:** To turn off the Savitzky-Golay filter, change `apply_sg = FALSE` in `executable.R`.
-* **Metadata Columns:** If your dataset has more or fewer metadata columns before the input features (e.g.- spectral data), adjust `meta_cols = 1:X` in `executable.R` and update the column indexing in `bootstrap_MMCNN_*.R` (specifically `X_train_A` and `X_train_B`).
+* **Metadata Columns:** If your dataset has more or fewer metadata columns before the input features (e.g.- spectral data), adjust `meta_cols = 1:X` in `executable.R`
 
 ## Citation
 
@@ -125,7 +125,3 @@ If you use this code, please cite the associated manuscript:
 
 * *Chamberlin, D. W., Helser, T. E., Brogan, J. D., Benson, I. M., Conner, J., Chin, A. T., Gburski, C. M., Matta, M. E., Pearce, J. A., Stone, K. R., TenBrink, T. T., & Arrington, M. B. (In review). A framework to investigate the effects of observation error on neural network predictions of fish age. Fish and Fisheries.*
 * Original MMCNN model adapted from Benson et al. (2023).
-
-```
-
-```

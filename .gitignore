@@ -6,6 +6,7 @@ docs
 /single_run
 /sims
 /data/spectra.csv
+/R/MMCNN Model.R
 /R/SD_at_age_NIR_figure.R
 .Rhistory
 Output
