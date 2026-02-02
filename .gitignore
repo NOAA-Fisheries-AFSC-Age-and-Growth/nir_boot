@@ -1,6 +1,4 @@
 single_run
-sims_err
-sims_known
 test_sims
 docs
 /single_run
@@ -9,7 +7,6 @@ docs
 /R/MMCNN Model.R
 /R/SD_at_age_NIR_figure.R
 .Rhistory
-Output
 Normal_Dist
 Output_multi
 sims_err_multi
