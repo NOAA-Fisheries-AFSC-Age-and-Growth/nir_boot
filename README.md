@@ -87,7 +87,7 @@ Once the simulations are complete, use `analysis.R` to aggregate the metrics and
 
 **Outputs (in `./Output/`):**
 
-* **`metrics_err.csv` / `metrics_known.csv**`: Aggregated performance metrics (R², RMSE, APE, CV) for every iteration.
+* **`metrics_err.csv` / `metrics_known.csv`**: Aggregated performance metrics (R², RMSE, APE, CV) for every iteration.
 * **`Violin.png`**: Violin plots comparing RMSE and R² distributions across the Null and Age Error models.
 * **`Boxplot_all_scenarios.png`**: Visual comparison of predicted vs. reference age distributions.
 * **Markdown Tables**: The script prints summary tables (Mean ± 95% CI) to the console for easy copying into manuscripts.
