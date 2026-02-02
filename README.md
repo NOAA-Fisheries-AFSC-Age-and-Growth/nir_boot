@@ -2,7 +2,9 @@
 
 This repository contains the R scripts and data processing pipeline used to analyze the effects of ageing error on neural network model predictions of fish age. The analysis implements a Multi-Modal Convolutional Neural Network (MMCNN) and incorporates traditional ageing error through a bootstrapping simulation approach.
 
-The code allows users to quantify how reader uncertainty (bias and precision) propagates into deep learning age predictions by simulating "Ageing Error" scenarios versus a "Known Age" (Null) control and includes an example application using FT-NIRS spectra.
+The code allows users to quantify how reader uncertainty (bias and precision) propagates into deep learning age predictions by simulating "Ageing Error" scenarios versus a "Known Age" (Null) control and includes an example application using FT-NIRS spectra. 
+
+*Note: Example outputs from n = 3 iterations are included as a usage example. Individual calibrated models are not included due to file size limitations.*
 
 ## Repository Structure
 
