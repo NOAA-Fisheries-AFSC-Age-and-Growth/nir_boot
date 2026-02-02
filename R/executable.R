@@ -10,11 +10,21 @@ source(paste0(wd,"/R/Functions.R"))
 df_path = "./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"
 
 #Apply Savitzky-Golay filter to FT-NIRS spectra
-apply_sg(wd, df_path, apply_sg =  FALSE, start_col = 8)
+apply_sg(wd, 
+         df_path, 
+         apply_sg =  FALSE,  #CHANGE TO TRUE FOR FINAL!!!!
+         start_col = 8)
 
-nsim <-1L:3L
-reader_dir <- "./data/7_readers_complete_dataset_TMB_Age_23/Results"
-age_files(nsim, wd, reader_dir, df_path, age_col = 3, train_test_col = 2, meta_cols = 1:7)
+nsim = 1L:2L
+
+#generate bootstrap age files for n iterations
+age_files(nsim, 
+          wd, 
+          reader_dir = "./data/7_readers_complete_dataset_TMB_Age_23/Results", 
+          df_path, 
+          age_col = 3, 
+          train_test_col = 2, 
+          meta_cols = 1:7)
 
 for (j in nsim) {
   # Construct the command to run the external R script

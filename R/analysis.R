@@ -8,6 +8,7 @@ library(knitr)
 
 wd <- "G:/My Drive/Research/TMA_FT_NIR_Uncertainty/nir_boot"
 setwd(wd)
+source(paste0(wd,"/R/Functions.R"))
 
 dir.create(paste0("./Output"),showWarnings = FALSE)
 
@@ -16,6 +17,16 @@ nsim <- length(sim_dirs)
 
 if (nsim == 0) {
   stop("No simulation folders found in ./sims_err. Check your directory.")
+}
+
+#calculate performance metrics for known error scenario
+for (j in 1:nsim) {
+  known(j, wd)
+}
+
+#calculate performance metrics for ageing error scenario and known vs ageing error scenario
+for (j in 1:nsim) {
+  known_vs_error(j, wd)
 }
 
 #Ageing Error

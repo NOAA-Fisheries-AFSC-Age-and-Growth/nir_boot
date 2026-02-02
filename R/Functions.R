@@ -151,3 +151,269 @@ age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, me
   }
   
 }
+
+known_vs_error <- function(j, wd) {
+  library(ggplot2)
+  library(dplyr)
+  
+  train_known <- read.csv(paste0(wd, "/sims_known/", j, "/Output/Data/train_predictions.csv"))
+  test_known <- read.csv(paste0(wd, "/sims_known/", j, "/Output/Data/test_predictions.csv"))
+  train_err <- read.csv(paste0(wd, "/sims_err/", j, "/Output/Data/train_predictions.csv"))
+  test_err <- read.csv(paste0(wd, "/sims_err/", j, "/Output/Data/test_predictions.csv"))
+  
+  write.csv(train_known, file = paste0(wd, "/sims_err/", j, "/Output/Data/train_predictions_known.csv"), row.names = FALSE)
+  
+  plot <- ggplot(train_known, aes(x = train, y = pred)) +
+    geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
+    geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
+    scale_x_continuous(limits = c(-1, 30)) +
+    scale_y_continuous(limits = c(-1, 30)) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 20),
+      axis.title.x = element_text(size = 20),
+      axis.title.y = element_text(size = 20),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      plot.title = element_text(size = 25, hjust = 0.5),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(
+      title = "Training Set",
+      x = "Traditional Age (years)",
+      y = "FT-NIR Age (years)"
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_err/", j, "/Output/Figures/TrainingSet_Known.png"), plot = plot, width = 12, height = 12, units = "in", dpi = 300)
+  
+  print(plot)
+  
+  write.csv(test_known, file = paste0(wd, "/sims_err/", j, "/Output/Data/test_predictions_known.csv"), row.names = FALSE)
+  
+  plot <- ggplot(test_known, aes(x = train, y = pred)) +
+    geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
+    geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
+    scale_x_continuous(limits = c(-1, 30)) +
+    scale_y_continuous(limits = c(-1, 30)) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 20),
+      axis.title.x = element_text(size = 20),
+      axis.title.y = element_text(size = 20),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      plot.title = element_text(size = 25, hjust = 0.5),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(
+      title = "Test Set",
+      x = "Traditional Age (years)",
+      y = "FT-NIR Age (years)"
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_err/", j, "/Output/Figures/TestSet_Known.png"), plot = plot, width = 12, height = 12, units = "in", dpi = 300)
+  
+  print(plot)
+  
+  
+  data_known <- test_known %>%
+    mutate(
+      Mean = (train + pred) / 2,
+      Difference = train - pred,
+      Mean_diff = mean(Difference),
+      SD_diff = sd(Difference),
+      Limit_of_Agreement_upper = Mean_diff + 1.96 * SD_diff,
+      Limit_of_Agreement_lower = Mean_diff - 1.96 * SD_diff
+    )
+  
+  plot <- ggplot(data_known, aes(x = Mean, y = Difference)) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = data_known$Mean_diff, color = "blue", linetype = "dashed") +
+    geom_hline(yintercept = data_known$Limit_of_Agreement_upper, color = "red", linetype = "dashed") +
+    geom_hline(yintercept = data_known$Limit_of_Agreement_lower, color = "red", linetype = "dashed") +
+    labs(
+      title = "Bland-Altman Plot",
+      x = "Mean of Actual and Predicted",
+      y = "Difference between Actual and Predicted"
+    ) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 16),
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 12)
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_err/", j, "/Output/Figures/BlandAltman_Known.png"), plot = plot, width = 12, height = 8, units = "in", dpi = 300)
+  
+  print(plot)
+  
+  r2_score <- function(y_true, y_pred) {
+    ss_total <- sum((y_true - mean(y_true))^2)
+    ss_residual <- sum((y_true - y_pred)^2)
+    r2 <- 1 - (ss_residual / ss_total)
+    return(r2)
+  }
+  
+  rmse_manual <- function(actual, predicted) {
+    mse <- mean((actual - predicted)^2)  # Calculate Mean Squared Error
+    return(sqrt(mse))  # Return the square root of MSE
+  }
+  
+  r_squared_tr_known <- r2_score(train_known$train, train_err$pred)
+  rmse_tr_known <- rmse_manual(train_known$train, train_err$pred)
+  
+  r_squared_known <- r2_score(test_known$train, test_err$pred)
+  rmse_known <- rmse_manual(test_known$train, test_err$pred)
+  
+  #error scenario
+  r_squared_tr <- r2_score(train_err$train, train_err$pred)
+  rmse_tr <- rmse_manual(train_err$train, train_err$pred)
+  
+  r_squared <- r2_score(test_err$train, test_err$pred)
+  rmse <- rmse_manual(test_err$train, test_err$pred)
+  
+  metrics <- matrix(data = NA, nrow = 1, ncol = 9)
+  colnames(metrics) <- c("iteration","train_R2_known", "train_RMSE_known", "test_R2_known", "test_RMSE_known",
+                         "train_R2", "train_RMSE", "test_R2", "test_RMSE")
+  metrics[1,1] <- j
+  metrics[1,2] <- r_squared_tr_known
+  metrics[1,3] <- rmse_tr_known
+  metrics[1,4] <- r_squared_known
+  metrics[1,5] <- rmse_known
+  metrics[1,6] <- as.numeric(r_squared_tr)
+  metrics[1,7] <- as.numeric(rmse_tr)
+  metrics[1,8] <- as.numeric(r_squared)
+  metrics[1,9] <- as.numeric(rmse)
+  
+  write.csv(metrics, 
+            file = paste0(wd, "/sims_err/", j, "/Output/Data/metrics",j,".csv"), 
+            row.names = FALSE)
+}
+
+known <- function(j, wd) {
+  library(ggplot2)
+  library(dplyr)
+  
+  train_known <- read.csv(paste0(wd, "/sims_known/", j, "/Output/Data/train_predictions.csv"))
+  test_known <- read.csv(paste0(wd, "/sims_known/", j, "/Output/Data/test_predictions.csv"))
+ 
+  plot <- ggplot(train_known, aes(x = train, y = pred)) +
+    geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
+    geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
+    scale_x_continuous(limits = c(-1, 30)) +
+    scale_y_continuous(limits = c(-1, 30)) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 20),
+      axis.title.x = element_text(size = 20),
+      axis.title.y = element_text(size = 20),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      plot.title = element_text(size = 25, hjust = 0.5),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(
+      title = "Training Set",
+      x = "Traditional Age (years)",
+      y = "FT-NIR Age (years)"
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_known/", j, "/Output/Figures/TrainingSet_Known.png"), plot = plot, width = 12, height = 12, units = "in", dpi = 300)
+  
+  print(plot)
+
+  plot <- ggplot(test_known, aes(x = train, y = pred)) +
+    geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
+    geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black", size = 1) +
+    scale_x_continuous(limits = c(-1, 30)) +
+    scale_y_continuous(limits = c(-1, 30)) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 20),
+      axis.title.x = element_text(size = 20),
+      axis.title.y = element_text(size = 20),
+      axis.text.x = element_text(size = 16),
+      axis.text.y = element_text(size = 16),
+      plot.title = element_text(size = 25, hjust = 0.5),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(
+      title = "Test Set",
+      x = "Traditional Age (years)",
+      y = "FT-NIR Age (years)"
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_known/", j, "/Output/Figures/TestSet_Known.png"), plot = plot, width = 12, height = 12, units = "in", dpi = 300)
+  
+  print(plot)
+  
+  
+  data_known <- test_known %>%
+    mutate(
+      Mean = (train + pred) / 2,
+      Difference = train - pred,
+      Mean_diff = mean(Difference),
+      SD_diff = sd(Difference),
+      Limit_of_Agreement_upper = Mean_diff + 1.96 * SD_diff,
+      Limit_of_Agreement_lower = Mean_diff - 1.96 * SD_diff
+    )
+  
+  plot <- ggplot(data_known, aes(x = Mean, y = Difference)) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = data_known$Mean_diff, color = "blue", linetype = "dashed") +
+    geom_hline(yintercept = data_known$Limit_of_Agreement_upper, color = "red", linetype = "dashed") +
+    geom_hline(yintercept = data_known$Limit_of_Agreement_lower, color = "red", linetype = "dashed") +
+    labs(
+      title = "Bland-Altman Plot",
+      x = "Mean of Actual and Predicted",
+      y = "Difference between Actual and Predicted"
+    ) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 16),
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 12)
+    )
+  
+  ggsave(filename = paste0(wd, "/sims_known/", j, "/Output/Figures/BlandAltman_Known.png"), plot = plot, width = 12, height = 8, units = "in", dpi = 300)
+  
+  print(plot)
+  
+  r2_score <- function(y_true, y_pred) {
+    ss_total <- sum((y_true - mean(y_true))^2)
+    ss_residual <- sum((y_true - y_pred)^2)
+    r2 <- 1 - (ss_residual / ss_total)
+    return(r2)
+  }
+  
+  rmse_manual <- function(actual, predicted) {
+    mse <- mean((actual - predicted)^2)  # Calculate Mean Squared Error
+    return(sqrt(mse))  # Return the square root of MSE
+  }
+  
+  r_squared_tr <- r2_score(train_known$train, train_known$pred)
+  rmse_tr <- rmse_manual(train_known$train, train_known$pred)
+  
+  r_squared <- r2_score(test_known$train, test_known$pred)
+  rmse <- rmse_manual(test_known$train, test_known$pred)
+  
+  metrics <- matrix(data = NA, nrow = 1, ncol = 5)
+  colnames(metrics) <- c("iteration", "train_R2", "train_RMSE", "test_R2", "test_RMSE")
+  metrics[1,1] <- j
+  metrics[1,2] <- as.numeric(r_squared_tr)
+  metrics[1,3] <- as.numeric(rmse_tr)
+  metrics[1,4] <- as.numeric(r_squared)
+  metrics[1,5] <- as.numeric(rmse)
+  
+  write.csv(metrics, 
+            file = paste0(wd, "/sims_known/", j, "/Output/Data/metrics",j,".csv"), 
+            row.names = FALSE)
+}
