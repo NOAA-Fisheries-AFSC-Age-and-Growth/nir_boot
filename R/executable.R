@@ -12,7 +12,7 @@ df_path = "./data/AGP_MMCNN_BSsurvey_pollock2014to2018.csv"
 #Apply Savitzky-Golay filter to FT-NIRS spectra
 apply_sg(wd, 
          df_path, 
-         apply_sg =  FALSE,  #CHANGE TO TRUE FOR FINAL!!!!
+         apply_sg =  TRUE,
          start_col = 8)
 
 nsim = 1L:2L

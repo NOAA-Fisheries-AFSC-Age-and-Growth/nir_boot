@@ -10,15 +10,10 @@ library(tidyr)
 
 Sys.setenv(TF_ENABLE_ONEDNN_OPTS = '0')
 
-# Check if TensorFlow can access the GPU
-#tf$config$list_physical_devices("GPU")
-#tf$config$experimental$set_memory_growth(tf$config$list_physical_devices("GPU")[[1]], TRUE)
-
 args <- commandArgs(trailingOnly = TRUE)
 j <- as.numeric(args[1])
 wd <- args[2]
 
-# Use 'j' in your script as needed
 message("Running simulation number ", j)
   
 setwd(paste0(wd,"/sims_err/",j))
@@ -48,16 +43,13 @@ X_test_A <- X_test[, 4:7]
 X_train_B <- X_train[, 8:ncol(X_train)]
 X_test_B <- X_test[, 8:ncol(X_test)]
   
-# Fit the scaler on 'y_train' and transform 'y_train' and 'y_test'
 scaler_y <- scale(y_train)
 y_train <- scaler_y
 y_test <- scale(y_test, center = attr(scaler_y, "scaled:center"), scale = attr(scaler_y, "scaled:scale"))
   
-# Fit the scaler on 'X_train_A' and transform 'X_train_A'
 scaler_x <- scale(as.matrix(X_train_A))
 X_train_A <- as.data.frame(scaler_x, col.names = colnames(X_train_A))
   
-# Transform 'X_test_A' using the scaler fitted on 'X_train_A'
 X_test_A <- as.data.frame(scale(as.matrix(X_test_A), center = attr(scaler_x, "scaled:center"), scale = attr(scaler_x, "scaled:scale")), col.names = colnames(X_test_A))
   
 input_dim_A <- as.integer(ncol(X_train_A))
@@ -79,7 +71,7 @@ build_model <- function(hp) {
   y <- layer_flatten()(y)
   y <- layer_dense(units = 4L, activation = "relu", name = "output_B")(y)
     
-  con <- layer_concatenate(inputs = list(x, y))  # merge
+  con <- layer_concatenate(inputs = list(x, y))
   
   z <- layer_dense(units = hp$Int('dense', min_value = 4L, max_value = 640L, step = 32L, default = 256L),
                    activation = "relu")(con)
@@ -98,46 +90,44 @@ build_model <- function(hp) {
   
 # Define the Hyperband tuner
 tuner <- Hyperband(
-  build_model,                        # Model building function
-  objective = "val_loss",             # Objective to minimize
-  max_epochs = 200,                   # Maximum number of epochs
-  executions_per_trial = as.integer(1),           # Number of executions per trial
-  seed = 42,                          # Random seed for reproducibility
-  directory = "Tuners",               # Directory to store tuning logs and checkpoints
-  project_name = "mmcnn"              # Project name for organization
+  build_model,
+  objective = "val_loss",
+  max_epochs = 200,
+  executions_per_trial = as.integer(1),
+  seed = 42,
+  directory = "Tuners",
+  project_name = "mmcnn"
 )
   
-  
-# Define parameters
+
 nb_epoch <- 200L
 batch_size <- 32L
 outputFilePath <- 'Estimator'
   
-# Define callbacks
 checkpointer <- callback_model_checkpoint(
-  filepath = paste0(outputFilePath, ".keras"),  # Save path for best model
-  monitor = "val_loss",                         # Metric to monitor
-  verbose = 1,                                  # Verbosity level
-  save_best_only = TRUE                         # Save only the best model
+  filepath = paste0(outputFilePath, ".keras"),
+  monitor = "val_loss",
+  verbose = 1,
+  save_best_only = TRUE
 )
   
 earlystop <- callback_early_stopping(
-  monitor = "val_loss",                      # Metric to monitor for early stopping
-  patience = 7,                              # Number of epochs with no improvement
-  verbose = 1,                               # Verbosity level
-  restore_best_weights = TRUE                # Restore best weights when stopped
+  monitor = "val_loss",
+  patience = 7,
+  verbose = 1,
+  restore_best_weights = TRUE
 )
   
 # Perform hyperparameter search with callbacks
 history <- tuner$search(
-  x = list(X_train_A, X_train_B),  # Input data list
-  y = y_train,                     # Target data
-  epochs = nb_epoch,               # Number of epochs
-  batch_size = batch_size,         # Batch size
-  shuffle = TRUE,                  # Shuffle data
-  validation_split = 0.25,         # Validation split
-  verbose = 1,                     # Verbosity level
-  callbacks = list(earlystop)      # List of callbacks
+  x = list(X_train_A, X_train_B),
+  y = y_train,
+  epochs = nb_epoch,
+  batch_size = batch_size,
+  shuffle = TRUE,
+  validation_split = 0.25,
+  verbose = 1,
+  callbacks = list(earlystop)
 )
   
 best_model <- tuner$get_best_models(num_models = 1L)[[1]]
@@ -146,7 +136,6 @@ keras3::save_model(best_model, filepath = "best_model.keras")
 best_hp <- tuner$get_best_hyperparameters(num_trials = 1L)[[1]]
   
   
-# Define parameters
 nb_epoch <- 2000L
 batch_size <- 32L
 outputFilePath <- 'Estimator'
@@ -154,45 +143,40 @@ outputFilePath <- 'Estimator'
 # Define callbacks
 callbacks <- list(
   callback_model_checkpoint(
-    filepath = paste0(outputFilePath, ".keras"),  # Save path for best model
-    monitor = "val_loss",                         # Metric to monitor
-    verbose = 1,                                  # Verbosity level
-    save_best_only = TRUE                         # Save only the best model
+    filepath = paste0(outputFilePath, ".keras"),
+    monitor = "val_loss",
+    verbose = 1,
+    save_best_only = TRUE
   ),
   callback_early_stopping(
-    monitor = "val_loss",                         # Metric to monitor for early stopping
-    patience = 100,                               # Number of epochs with no improvement
-    verbose = 1,                                  # Verbosity level
-    restore_best_weights = TRUE                   # Restore best weights when stopped
+    monitor = "val_loss",
+    patience = 100,
+    verbose = 1,
+    restore_best_weights = TRUE
   )
 )
   
 history <- best_model %>% keras3::fit(
-  x = list(X_train_A, X_train_B),   # Input data list
-  y = y_train,                      # Target data
-  epochs = nb_epoch,                # Number of epochs
-  batch_size = batch_size,          # Batch size
-  shuffle = TRUE,                   # Shuffle data
-  validation_split = 0.25,          # Validation split
-  verbose = 1,                      # Verbosity level
-  callbacks = callbacks             # List of callbacks
+  x = list(X_train_A, X_train_B),
+  y = y_train,
+  epochs = nb_epoch,
+  batch_size = batch_size,
+  shuffle = TRUE,
+  validation_split = 0.25,
+  verbose = 1,
+  callbacks = callbacks
 )
   
-# Extract the training history
 history_data <- history$metrics
   
-# Assuming 'history_data' is a data frame with 'loss' and 'val_loss' columns
-# Create a data frame for plotting
 history_df <- data.frame(
   epoch = seq_along(history_data$loss),
   loss = history_data$loss,
   val_loss = history_data$val_loss
 )
   
-# Convert to long format
 history_long <- pivot_longer(history_df, cols = c("loss", "val_loss"), names_to = "type", values_to = "value")
   
-# Plot
 ggplot(history_long, aes(x = epoch, y = value, color = type)) +
   geom_line(linewidth = 1) +
   labs(title = "Model Loss", y = "Loss", x = "Epoch") +
@@ -200,17 +184,14 @@ ggplot(history_long, aes(x = epoch, y = value, color = type)) +
   theme_minimal() +
   theme(legend.position = "top")
 
-# Evaluate the model
 eval_results <- best_model %>% evaluate(
   list(X_test_A, X_test_B),
   y_test
 )
 print(eval_results)
 
-# Generate predictions
 preds <- best_model %>% predict(list(X_test_A, X_test_B))
 
-# Function to compute R² score
 r2_score <- function(y_true, y_pred) {
   ss_total <- sum((y_true - mean(y_true))^2)
   ss_residual <- sum((y_true - y_pred)^2)
@@ -218,17 +199,14 @@ r2_score <- function(y_true, y_pred) {
   return(r2)
 }
 
-# Compute R² score
 r2 <- r2_score(y_test, preds)
 print(paste("R² Score:", r2))
 
-# Convert predictions and true values to a data frame
 plot_data <- data.frame(
   True = as.vector(y_test),
   Predicted = as.vector(preds)
 )
 
-# Plot
 ggplot(plot_data, aes(x = True, y = Predicted)) +
   geom_point(alpha = 0.5) +
   geom_abline(slope = 1, intercept = 0, color = "red") +
@@ -237,88 +215,64 @@ ggplot(plot_data, aes(x = True, y = Predicted)) +
   ylim(-2.5, 5) +
   theme_minimal()
 
-# Calculate the error
 error <- c(preds) - c(y_test)
 
-# Plot Histogram
 hist(error, breaks=20, main="Histogram of Prediction Error", xlab="Prediction Error", ylab="Count", col="lightblue")
 
 summary(best_model)
 
-# Predict using the model, training data
 preds_t <- best_model %>% predict(list(X_train_A, X_train_B))
 
-# Assuming y_train and preds_t are vectors of the same length
 r2 <- r2_score(y_train, preds_t)
 print(paste("R^2 Score:", r2))
 
-# Reverse the normalization
 inverse_transform <- function(predictions, mean, sd) {
   return(predictions * sd + mean)
 }
 
-# Extract mean and standard deviation
 mean_y <- attr(scaler_y, "scaled:center")
 sd_y <- attr(scaler_y, "scaled:scale")
 
-# Assuming preds_t are the predicted values (standardized)
 y_pr_transformed <- inverse_transform(preds_t, mean_y, sd_y)
 
-# Check length of transformed predictions
 length_y_pr_transformed <- length(y_pr_transformed)
 print(length_y_pr_transformed)
 
-# Reshape y_train to be a column vector
 y_train_reshaped <- matrix(y_train, ncol = 1)
 
-# Reverse normalization for the reshaped training data
 y_tr_transformed <- inverse_transform(scaler_y, mean_y, sd_y)
 
-# Length of transformed training data
 length_y_tr_transformed <- length(y_tr_transformed)
 print(length_y_tr_transformed)
 
-# Compute R^2 score
 r_squared_tr <- r2_score(y_tr_transformed, y_pr_transformed)
 
-# Round to two decimal places
 r_squared_tr_rounded <- round(r_squared_tr, 2)
 
-# Print the rounded R^2 score
 print(paste("Rounded R^2 score:", r_squared_tr_rounded))
 
-# Manual calculation of RMSE
 rmse_manual <- function(actual, predicted) {
-  mse <- mean((actual - predicted)^2)  # Calculate Mean Squared Error
-  return(sqrt(mse))  # Return the square root of MSE
+  mse <- mean((actual - predicted)^2)
+  return(sqrt(mse))
 }
 
-# Compute RMSE
 rmse_tr <- rmse_manual(y_tr_transformed, y_pr_transformed)
 
-# Round RMSE to two decimal places
 rmse_tr_rounded <- round(rmse_tr, 2)
 
-# Print the rounded RMSE
 print(paste("Rounded RMSE:", rmse_tr_rounded))
 
-# Convert vectors to data frames
 y_tr_df <- data.frame(train = y_tr_transformed, pred = y_pr_transformed)
 
-# Reset index (in R, this is typically done by ensuring the data is a data frame)
-# We can add the file column directly to the data frame
 y_tr_df$file <- f_train
 
-# Display the first few rows of the resulting data frame
 head(y_tr_df, 2)
 
 dir.create('./Output/Data', recursive = TRUE, showWarnings = FALSE)
 dir.create('./Output/Figures', showWarnings = FALSE)
 
-# Save data frame to CSV file
 write.csv(y_tr_df, file = './Output/Data/train_predictions.csv', row.names = FALSE)
 
-# Create the plot
 plot <- ggplot(y_tr_df, aes(x = train, y = pred)) +
   geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
   geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
@@ -342,50 +296,34 @@ plot <- ggplot(y_tr_df, aes(x = train, y = pred)) +
     y = "FT-NIR Age (years)"
   )
 
-# Save the plot
 ggsave(filename = "./Output/Figures/TrainingSet.png", plot = plot, width = 12, height = 12, units = "in", dpi = 300)
   
-# Print the plot
 print(plot)
 
 
-#Test Data
-# Apply inverse transformation
 y_pred_transformed <- inverse_transform(preds, mean_y, sd_y)
 y_test_transformed <- inverse_transform(y_test, mean_y, sd_y)
 
-# Compute R^2 score
 r_squared <- r2_score(y_test_transformed, y_pred_transformed)
 
-# Round to two decimal places
 r_squared_rounded <- round(r_squared, 2)
 
-# Print the rounded R^2 score
 print(paste("Rounded R^2 score:", r_squared_rounded))
 
-# Compute RMSE
 rmse <- rmse_manual(y_test_transformed, y_pred_transformed)
 
-# Round RMSE to two decimal places
 rmse_rounded <- round(rmse, 2)
 
-# Print the rounded RMSE
 print(paste("Rounded RMSE:", rmse_rounded))
 
-# Convert vectors to data frames
 y_test_df <- data.frame(train = y_test_transformed, pred = y_pred_transformed)
 
-# Reset index (in R, this is typically done by ensuring the data is a data frame)
-# We can add the file column directly to the data frame
 y_test_df$file <- f_test
 
-# Display the first few rows of the resulting data frame
 head(y_test_df, 2)
 
-# Save data frame to CSV file
 write.csv(y_test_df, file = './Output/Data/test_predictions.csv', row.names = FALSE)
 
-# Create the plot
 plot <- ggplot(y_test_df, aes(x = train, y = pred)) +
   geom_point(color = 'blue', fill = 'lightblue', size = 4, alpha = 0.5, shape = 21, stroke = 1) +
   geom_smooth(method = 'lm', color = 'black', size = 1.5, alpha = 0.5) +
@@ -409,10 +347,8 @@ plot <- ggplot(y_test_df, aes(x = train, y = pred)) +
     y = "FT-NIR Age (years)"
   )
 
-# Save the plot
 ggsave(filename = "./Output/Figures/TestSet.png", plot = plot, width = 12, height = 12, units = "in", dpi = 300)
 
-# Print the plot
 print(plot)
 
 data <- y_test_df %>%
@@ -425,7 +361,6 @@ data <- y_test_df %>%
     Limit_of_Agreement_lower = Mean_diff - 1.96 * SD_diff
   )
 
-# Create the plot
 plot <- ggplot(data, aes(x = Mean, y = Difference)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = data$Mean_diff, color = "blue", linetype = "dashed") +
@@ -443,10 +378,8 @@ plot <- ggplot(data, aes(x = Mean, y = Difference)) +
     axis.text = element_text(size = 12)
   )
 
-# Save the plot
 ggsave(filename = './Output/Figures/BlandAltman.png', plot = plot, width = 12, height = 8, units = "in", dpi = 300)
 
-# Print the plot
 print(plot)
 
 metrics <- matrix(data = NA, nrow = 1, ncol = 5)

@@ -236,10 +236,10 @@ legend <- get_legend(R2_plot)
 
 # Arrange plots with shared legend
 combined_plot <- plot_grid(
-  R2_plot + theme(legend.position = "none"), # Remove legend from R2_plot
-  RMSE_plot + theme(legend.position = "none"), # Remove legend from RMSE_plot
-  legend,                                      # Add the shared legend
-  ncol = 3, nrow = 1, rel_widths = c(1, 1, 0.4) # Adjust heights to fit legend
+  R2_plot + theme(legend.position = "none"),
+  RMSE_plot + theme(legend.position = "none"),
+  legend,
+  ncol = 3, nrow = 1, rel_widths = c(1, 1, 0.4)
 )
 
 combined_plot <- ggdraw() +

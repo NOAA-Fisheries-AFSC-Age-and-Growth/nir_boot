@@ -25,11 +25,6 @@ samp_age <- function(input_age, nreaders, bias_mat, sd_mat){
   reader_id <- sample.int(nreaders,length(input_age), replace = TRUE)#apply a random reader to each age estimate
   output_age <- vector(length = length(input_age))
   
-  #for (i in 1:length(input_age)) {
-  #  output_age[i] <- round(abs(rnorm(1, mean = bias_mat[input_age[i]+1,reader_id[i]], sd = sd_mat[input_age[i]+1,reader_id[i]])))
-  #}
-  
-  #AE_mat is list of ageing error matrices for each reader
   AE_mat <- vector("list", nreaders)
   for (i in 1:nreaders) {
     AE_mat[[i]] <- diag(nrow(bias_mat))
@@ -73,7 +68,6 @@ boot_age <- function(n_boot, input_age, bias_mat, sd_mat){
 }
 
 age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, meta_cols){
-  #This script bootstraps the age data iterations
   setwd(wd)
   
   reader_files <- list.files(reader_dir, pattern = "\\.csv$", full.names = TRUE)
@@ -85,7 +79,6 @@ age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, me
   n_readers <- length(reader_files)
   message(paste("Found", n_readers, "reader files in directory. Processing..."))
   
-  #Empty matrics for bias and SD
   TMA_bias <- NULL
   TMA_sd <- NULL
   
@@ -119,10 +112,8 @@ age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, me
   set.seed(581)
   new_ages <- boot_age(nsim, input_age, TMA_bias, TMA_sd) 
   
-  # Print the number of simulations
   message("Total age error files: ", length(nsim))
-  
-  #create a folder to store all the sims
+
   dir.create("./sims_err", showWarnings = FALSE) 
   
   df <- df[,meta_cols]
@@ -135,10 +126,8 @@ age_files <- function(nsim, wd, reader_dir, df_path, age_col, train_test_col, me
     write.csv(df, paste0("./sims_err/",i,"/input.csv"), row.names=FALSE)
   }
   
-  # Print the number of simulations
   message("Total known age files: ", length(nsim))
   
-  #create a folder to store all the sims
   dir.create("./sims_known", showWarnings = FALSE) 
   
   df <- df2[,meta_cols]
